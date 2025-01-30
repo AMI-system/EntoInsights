@@ -8,6 +8,7 @@ Authors@R: c(
 Description: The EntoInsights R package provides functions for wrangling, analysing, and visualising entomological datasets generated from AI-based insect identifications, such as those produced by AMI (Automated Monitoring of Insects). 
 Imports:
     dplyr,
+    jsonlite,
     lubridate,
     sf,
     stringr
@@ -21,3 +22,7 @@ Depends:
 LazyData: true
 References: National Biodiversity Network (NBN) Record Cleaner. See 
     <https://nbn.org.uk/tools-and-resources/nbn-record-cleaner/>.
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
