@@ -1,7 +1,7 @@
 #' Download files from an S3 bucket
 #'
 #' This function downloads files from an S3 bucket given a list of deployment IDs,
-#' data types, filenames, and classification IDs. It supports parallel downloading.
+#' data types, filenames, and classification IDs. Files are downloaded in parallel.
 #'
 #' @param bucket Character. Name of the S3 bucket.
 #' @param deployment_id Character vector. List of deployment IDs.
