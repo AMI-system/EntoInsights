@@ -1,52 +1,56 @@
 #' Download files from an S3 bucket
 #'
-#' This function downloads files from an AWS S3 bucket based on deployment ID,
-#' filename, and classification ID. It ensures the directory structure exists,
-#' supports parallel downloading, and returns a dataframe with the local file paths.
+#' This function downloads files from an S3 bucket given a list of deployment IDs,
+#' data types, filenames, and classification IDs. It supports parallel downloading.
 #'
-#' @param bucket A character string specifying the name of the S3 bucket.
-#' @param deployment_id A character vector of deployment IDs.
-#' @param data_type A character string specifying the type of data (used to construct the S3 key).
-#' @param filename A character vector of filenames corresponding to the deployment IDs.
-#' @param classification_id A character vector of classification IDs, must have the same length as `deployment_id` and `filename`.
-#' @param download_path A character string specifying the local directory where files should be downloaded. Default is "./downloads".
-#'
-#' @return A dataframe containing `deployment_id`, `local_path`, and `classification_id` for the downloaded files.
-#'
-#' @details
-#' - The function reads AWS credentials from a JSON file (`./credentials.json`).
-#' - It uses the `paws` package to interact with AWS S3.
-#' - Parallel downloading is enabled using the `furrr` package.
-#' - If any downloads fail, an error message is displayed, and the function proceeds with the remaining downloads.
-#'
-#'
+#' @param bucket Character. Name of the S3 bucket.
+#' @param deployment_id Character vector. List of deployment IDs.
+#' @param data_type Character vector or single value. Data type(s) corresponding to each file.
+#' @param filename Character vector. List of filenames to download.
+#' @param classification_id Numeric or character vector. List of classification IDs.
+#' @param download_path Character. Local directory where files will be downloaded. Default is "./downloads".
+#' @param credentials_path Character. Path to credentials file JSON.
 #' @import jsonlite
 #' @import tibble
 #' @import fs
 #' @import furrr
+#' @return A data frame containing deployment IDs, data types, local file paths, and classification IDs of downloaded files.
 #' @export
+download_object_store_files <- function(bucket, deployment_id, data_type, filename, classification_id = NULL, download_path = "./downloads", credentials_path = "./credentials.json") {
+  
+  # Warning message
+  credentials_check(credentials_path)
 
-download_object_store_files <- function(bucket, deployment_id, data_type, filename, classification_id = NULL, download_path = "./downloads") {
-  # Validate inputs
-
-  if (is.null(classification_id)){
+  # generate classification ID if NULL  
+    if (is.null(classification_id)){
     print("generating classification IDs")
     classification_id = 1:length(filename)
   }
-
+  
+  # Validate inputs
   if (length(unique(lengths(list(deployment_id, filename, classification_id)))) > 1) {
     stop("deployment_id, filename, and classification_id must have the same length.")
+  }
+  
+  if (length(data_type) != 1 && length(data_type) != length(deployment_id)) {
+    stop("data_type must be either a single value or the same length as other inputs.")
+  }
+  
+  # Repeat data_type if it's a single value
+  if (length(data_type) == 1) {
+    data_type <- rep(data_type, length(deployment_id))
   }
   
   # Create a dataframe from inputs
   file_details_df <- tibble(
     deployment_id = deployment_id,
+    data_type = data_type,
     filename = filename,
     classification_id = classification_id
   )
   
   # Initialize S3 client
-  aws_credentials <- fromJSON("./credentials.json")
+  aws_credentials <- fromJSON(credentials_path)
   s3 <- paws::s3(
     config = list(
       credentials = list(
@@ -75,8 +79,9 @@ download_object_store_files <- function(bucket, deployment_id, data_type, filena
       
       bucket_name <- bucket
       deployment_id <- row$deployment_id
+      data_type <- row$data_type
       filename <- row$filename
-      classification_id = row$classification_id
+      classification_id <- row$classification_id
       
       # Construct the S3 key and local download path
       key <- file.path(deployment_id, data_type, filename)
@@ -94,7 +99,7 @@ download_object_store_files <- function(bucket, deployment_id, data_type, filena
         writeBin(object$Body, local_path)
         message("Downloaded: ", key)
         # Return a dataframe with the download result
-        return(data.frame(deployment_id = deployment_id, local_path = local_path, classification_id = classification_id, stringsAsFactors = FALSE))
+        return(data.frame(deployment_id = deployment_id, data_type = data_type, local_path = local_path, classification_id = classification_id, stringsAsFactors = FALSE))
       }, error = function(e) {
         message("Error downloading ", key, ": ", e$message)
         # Return NULL on error

@@ -12,7 +12,7 @@
 #' @export
 #'
 #' @examples
-#' generate_aws_json("my_access_key", "my_secret_key")
+#' create_credentials("my_access_key", "my_secret_key")
 #'
 #' # Custom file path
 #' generate_aws_json("my_access_key", "my_secret_key", "custom_path.json")

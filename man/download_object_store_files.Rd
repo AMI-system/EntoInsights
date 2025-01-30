@@ -10,35 +10,29 @@ download_object_store_files(
   data_type,
   filename,
   classification_id = NULL,
-  download_path = "./downloads"
+  download_path = "./downloads",
+  credentials_path = "./credentials.json"
 )
 }
 \arguments{
-\item{bucket}{A character string specifying the name of the S3 bucket.}
+\item{bucket}{Character. Name of the S3 bucket.}
 
-\item{deployment_id}{A character vector of deployment IDs.}
+\item{deployment_id}{Character vector. List of deployment IDs.}
 
-\item{data_type}{A character string specifying the type of data (used to construct the S3 key).}
+\item{data_type}{Character vector or single value. Data type(s) corresponding to each file.}
 
-\item{filename}{A character vector of filenames corresponding to the deployment IDs.}
+\item{filename}{Character vector. List of filenames to download.}
 
-\item{classification_id}{A character vector of classification IDs, must have the same length as \code{deployment_id} and \code{filename}.}
+\item{classification_id}{Numeric or character vector. List of classification IDs.}
 
-\item{download_path}{A character string specifying the local directory where files should be downloaded. Default is "./downloads".}
+\item{download_path}{Character. Local directory where files will be downloaded. Default is "./downloads".}
+
+\item{credentials_path}{Character. Path to credentials file JSON.}
 }
 \value{
-A dataframe containing \code{deployment_id}, \code{local_path}, and \code{classification_id} for the downloaded files.
+A data frame containing deployment IDs, data types, local file paths, and classification IDs of downloaded files.
 }
 \description{
-This function downloads files from an AWS S3 bucket based on deployment ID,
-filename, and classification ID. It ensures the directory structure exists,
-supports parallel downloading, and returns a dataframe with the local file paths.
-}
-\details{
-\itemize{
-\item The function reads AWS credentials from a JSON file (\code{./credentials.json}).
-\item It uses the \code{paws} package to interact with AWS S3.
-\item Parallel downloading is enabled using the \code{furrr} package.
-\item If any downloads fail, an error message is displayed, and the function proceeds with the remaining downloads.
-}
+This function downloads files from an S3 bucket given a list of deployment IDs,
+data types, filenames, and classification IDs. It supports parallel downloading.
 }
