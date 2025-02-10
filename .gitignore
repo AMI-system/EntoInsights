@@ -20,3 +20,13 @@
 EntoInsights.Rproj
 
 .Rbuildignore
+
+# Developer files
+dev_code.R
+development
+dep000080.csv
+
+# Files for downloading from the object store
+credentials.json
+inst/doc
+cheatsheet.Rmd
