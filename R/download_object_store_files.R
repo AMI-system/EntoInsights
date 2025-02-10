@@ -15,6 +15,9 @@
 #' @import tibble
 #' @import fs
 #' @import furrr
+#' @import future
+#' @import purrr
+#' @import paws.storage
 #' @return A data frame containing deployment IDs, data types, local file paths, and classification IDs of downloaded files.
 #' @export
 download_object_store_files <- function(bucket, deployment_id, data_type, filename, classification_id = NULL, download_path = "./downloads", credentials_path = "./credentials.json", save_download_log = TRUE) {
