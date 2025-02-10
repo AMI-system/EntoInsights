@@ -26,9 +26,9 @@ and converts them into datetime objects.
 \examples{
 
 # Example filenames
-file_names <- c("image_20240101_123456.jpg", "sensor20231231123059.csv")
+file_names <- c("dep000092/snapshot_images/20240918032339-snapshot.jpg", "dep000050/ultrasound_recordings/19700101_000114.WAV")
 
 # Parse datetimes
-parsed_dates <- parse_datetimes(file_names)
+parsed_dates <- parse_AMI_datetimes(file_names)
 
 }

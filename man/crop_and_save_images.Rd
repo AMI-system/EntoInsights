@@ -25,8 +25,8 @@ crop_and_save_images(
 A dataframe that allows you to track successful file downloads. The dataframe contains columns deployment_id, containing the deployment id, the local installation path, and the classification id.
 }
 \description{
-This function can be used to crop object store files from the object store service. This function is useful for users intending to download subsets of data from a deployment or from multiple deployments.
-To download greater numbers of files from the object store (e.g., all files in a deployment), please see the function here ().
+This function can be used to crop snapshots from the object store service. This function is useful for users intending to download subsets of data from a deployment or from multiple deployments.
+To download greater numbers of files from the object store (e.g., all files in a deployment), please see the object store functions at \url{https://github.com/AMI-system/object-store-scripts/tree/image_download}..
 Please note, to run this function you need to generate a credentials JSON file, which requires a key, managed by the object store data manager.
 Once you have a key, you can generate a credentials object using the function, create_credentials().
 }

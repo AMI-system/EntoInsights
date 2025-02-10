@@ -21,6 +21,7 @@ This function appends columns onto a classifications dataframe indicating whethe
 spatial presence (1 or 0), phenology (1 or 0), and appends a column with a scale regarding identification difficulty (from 1 - 4, distinct to requiring dissection, or 5, meaning Ungraded).
 The function uses preloaded 'rules' datasets provided by the NBN Record Cleaner. The function iterates through all detected top-n classifications
 (e.g., \code{top_1_species}, \code{top_2_species}, etc.) and appends spatial presence, phenology, and identification difficulty for each classification separately.
+Note, currently this application of the record cleaner does not assess results collected in Northern Ireland.
 }
 \details{
 The data appended by this function is obtained from the NBN Record Cleaner.

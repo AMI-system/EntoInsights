@@ -10,13 +10,14 @@
 #' @param classification_id Numeric or character vector. List of classification IDs.
 #' @param download_path Character. Local directory where files will be downloaded. Default is "./downloads".
 #' @param credentials_path Character. Path to credentials file JSON.
+#' @param save_download_log Logical. Whether to save download log.
 #' @import jsonlite
 #' @import tibble
 #' @import fs
 #' @import furrr
 #' @return A data frame containing deployment IDs, data types, local file paths, and classification IDs of downloaded files.
 #' @export
-download_object_store_files <- function(bucket, deployment_id, data_type, filename, classification_id = NULL, download_path = "./downloads", credentials_path = "./credentials.json") {
+download_object_store_files <- function(bucket, deployment_id, data_type, filename, classification_id = NULL, download_path = "./downloads", credentials_path = "./credentials.json", save_download_log = TRUE) {
   
   # Warning message
   credentials_check(credentials_path)
@@ -113,6 +114,11 @@ download_object_store_files <- function(bucket, deployment_id, data_type, filena
   
   # Combine results into a single dataframe, excluding NULLs
   downloaded_files <- do.call(rbind, results[!sapply(results, is.null)])
+
+  if(save_download_log){
+    print("Saving download log")
+    write.csv(downloaded_files, "files_downloaded_log.csv")
+  }
   
   # Return the combined dataframe
   return(downloaded_files)

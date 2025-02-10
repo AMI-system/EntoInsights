@@ -11,7 +11,8 @@ download_object_store_files(
   filename,
   classification_id = NULL,
   download_path = "./downloads",
-  credentials_path = "./credentials.json"
+  credentials_path = "./credentials.json",
+  save_download_log = TRUE
 )
 }
 \arguments{
@@ -28,11 +29,13 @@ download_object_store_files(
 \item{download_path}{Character. Local directory where files will be downloaded. Default is "./downloads".}
 
 \item{credentials_path}{Character. Path to credentials file JSON.}
+
+\item{save_download_log}{Logical. Whether to save download log.}
 }
 \value{
 A data frame containing deployment IDs, data types, local file paths, and classification IDs of downloaded files.
 }
 \description{
 This function downloads files from an S3 bucket given a list of deployment IDs,
-data types, filenames, and classification IDs. It supports parallel downloading.
+data types, filenames, and classification IDs. Files are downloaded in parallel.
 }

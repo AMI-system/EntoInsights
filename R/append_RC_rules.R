@@ -4,6 +4,7 @@
 #' spatial presence (1 or 0), phenology (1 or 0), and appends a column with a scale regarding identification difficulty (from 1 - 4, distinct to requiring dissection, or 5, meaning Ungraded).
 #' The function uses preloaded 'rules' datasets provided by the NBN Record Cleaner. The function iterates through all detected top-n classifications
 #' (e.g., `top_1_species`, `top_2_species`, etc.) and appends spatial presence, phenology, and identification difficulty for each classification separately.
+#' Note, currently this application of the record cleaner does not assess results collected in Northern Ireland.
 #'
 #' @param classifications_df A dataframe containing classifications. This dataset assumes the data is in the format obtained from the classification pipeline on JASMIN.
 #' @param latitude Latitude of the deployment.
@@ -78,6 +79,10 @@ append_RC_rules <- function(classifications_df, longitude, latitude) {
 
     grid_ref <- convert_to_km100_10(longitude, latitude)
 
+    if (is.na(grid_ref$km100) | is.na(grid_ref$km10)) {
+    stop("Error: Grid reference calculation failed. Please check your coordinates.")
+    }
+
     # Filter tenkm based on grid reference
     tenkm_site <- tenkm %>%
         filter(km100 == grid_ref$km100) %>%
@@ -87,7 +92,7 @@ append_RC_rules <- function(classifications_df, longitude, latitude) {
     # Process classifications_df
     classifications_df <- classifications_df %>%
         mutate(
-            observation_date = as.Date(str_extract(image_path, "\\d{8}"), format = "%Y%m%d"),
+            observation_date = as.Date(parse_AMI_datetimes(image_path), format = "%Y%m%d"),
             observation_month = month(observation_date),
             observation_day = day(observation_date)
         )

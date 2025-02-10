@@ -1,7 +1,7 @@
 #' Crops snapshot images
 #'
-#' This function can be used to crop object store files from the object store service. This function is useful for users intending to download subsets of data from a deployment or from multiple deployments.
-#' To download greater numbers of files from the object store (e.g., all files in a deployment), please see the function here ().
+#' This function can be used to crop snapshots from the object store service. This function is useful for users intending to download subsets of data from a deployment or from multiple deployments.
+#' To download greater numbers of files from the object store (e.g., all files in a deployment), please see the object store functions at \url{https://github.com/AMI-system/object-store-scripts/tree/image_download}..
 #' Please note, to run this function you need to generate a credentials JSON file, which requires a key, managed by the object store data manager.
 #' Once you have a key, you can generate a credentials object using the function, create_credentials().
 #'
@@ -47,8 +47,12 @@ crop_and_save_images <- function(downloaded_files, classifications_df, output_di
       filter(deployment_id == deployment, basename(image_path) == basename(download_file_path), classification_id == classification_id_number)
     
     if (nrow(file_classification_row) == 0) {
-      message("No classification data found for file: ", download_file_path)
+      warning("No classification data found for file: ", download_file_path)
       return(NULL)
+    }
+
+    if(nrow(file_classification_row) > 1){
+      stop("crop extraction unable to pair species with crop. Halting extraction")
     }
     
     # Extract bounding box and species name
@@ -64,8 +68,13 @@ crop_and_save_images <- function(downloaded_files, classifications_df, output_di
     }
     
     # Generate output file name using classification_id
-    crop_name <- paste0(gsub(" ", "_", species_name), "_", file_classification_row$classification_id, ".jpg")
-    output_path <- file.path(output_dir, crop_name)
+    species_dir = file.path(output_dir, gsub(" ", "_", species_name))
+
+    if(!dir_exists(species_dir)){
+      dir_create(species_dir)
+    }
+
+    output_path <- file.path(species_dir, paste0(gsub(" ", "_", species_name), "_", file_classification_row$classification_id, ".jpg"))
     
     # Crop the image using bounding box
     tryCatch({
