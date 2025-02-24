@@ -131,7 +131,7 @@ classifications_subset = classifications_subset %>% mutate(classification_id = r
 bucket = "gbr"
 deployment_id = "dep000072"
 data_type = "snapshot_images"
-filenames = basename(classifications_subset$image_path),
+filenames = basename(classifications_subset$image_path)
 classification_id = classifications_subset$classification_id
 
 snapshot_downloads <- download_object_store_files(
@@ -177,7 +177,7 @@ download_object_store_files(
 To obtain crops, we need to provide the download log output from the `download_object_store_files` in the previous section, as well our classifications dataframe. The pairing is used to ensure that donwloaded snapshots are correctly linked to classifications in the dataframe, and generated crops.
 
 ```{r}
-crop_and_save_images(snapshot_downloads,
-  classifications_subset,
-  output_dir = "./crops") 
+# crop_and_save_images(snapshot_downloads,
+#   classifications_subset,
+#   output_dir = "./crops") 
 ```
