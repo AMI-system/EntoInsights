@@ -1,0 +1,6 @@
+{
+  "AWS_ACCESS_KEY_ID": "my_access_key",
+  "AWS_SECRET_ACCESS_KEY": "my_secret_key",
+  "AWS_REGION": "eu-west-2",
+  "AWS_URL_ENDPOINT": "https://ami-test-o.s3-ext.jc.rl.ac.uk"
+}

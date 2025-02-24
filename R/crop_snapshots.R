@@ -61,8 +61,12 @@ crop_and_save_images <- function(downloaded_files, classifications_df, output_di
     x_max <- as.numeric(file_classification_row$x_max)
     y_max <- as.numeric(file_classification_row$y_max)
     species_name <- file_classification_row$top_1_species
-    
-    if (species_name == "") {
+
+    if(is.na(species_name)||is.null(species_name)){
+      message("Species name missing for file: ", download_file_path)
+      return(NULL)
+    } 
+    if ((species_name == "")) {
       message("Species name missing for file: ", download_file_path)
       return(NULL)
     }

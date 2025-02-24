@@ -9,13 +9,14 @@
 #' 
 #' @return The function writes a JSON file to the specified location and returns the file path.
 #' @import jsonlite
-#' @export
 #'
 #' @examples
 #' create_credentials("my_access_key", "my_secret_key")
 #'
 #' # Custom file path
-#' generate_aws_json("my_access_key", "my_secret_key", "custom_path.json")
+#' create_credentials("my_access_key", "my_secret_key", "custom_path.json")
+#' 
+#' @export
 
 create_credentials <- function(access_key_id, secret_access_key, file_path = "credentials.json") {
   # Define AWS credentials structure

@@ -9,7 +9,7 @@ download_object_store_files(
   deployment_id,
   data_type,
   filename,
-  classification_id = NULL,
+  classification_id,
   download_path = "./downloads",
   credentials_path = "./credentials.json",
   save_download_log = TRUE
@@ -18,13 +18,13 @@ download_object_store_files(
 \arguments{
 \item{bucket}{Character. Name of the S3 bucket.}
 
-\item{deployment_id}{Character vector. List of deployment IDs.}
+\item{deployment_id}{Character vector or single value. Deployment ID corresponding to each file.}
 
 \item{data_type}{Character vector or single value. Data type(s) corresponding to each file.}
 
 \item{filename}{Character vector. List of filenames to download.}
 
-\item{classification_id}{Numeric or character vector. List of classification IDs.}
+\item{classification_id}{Numeric or character vector. Vector of classification IDs. This will often be your row number.}
 
 \item{download_path}{Character. Local directory where files will be downloaded. Default is "./downloads".}
 
@@ -33,7 +33,7 @@ download_object_store_files(
 \item{save_download_log}{Logical. Whether to save download log.}
 }
 \value{
-A data frame containing deployment IDs, data types, local file paths, and classification IDs of downloaded files.
+A data frame containing deployment IDs, data types, local file paths, classification IDs, and download status.
 }
 \description{
 This function downloads files from an S3 bucket given a list of deployment IDs,
