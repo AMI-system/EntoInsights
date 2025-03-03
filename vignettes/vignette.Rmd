@@ -1,0 +1,215 @@
+---
+title: "A guide to EntoInsights"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{A guide to extracting the crops the of classification images}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+library(knitr)
+```
+
+This vignette will guide you through:
+- Cleaning classification records using the **record cleaner** function.
+- Extracting date-time information from filenames.
+- Downloading and processing snapshot and audio and ultrasound images.
+
+### Setup
+
+### Installing and Loading the Package
+To install **EntoInsights**, use:
+```{r}
+# Install EntoInsights
+# devtools::install_github("AMI-system/EntoInsights")
+```
+
+If you are running this from the **source code** (I.E., you have have opened the package's source directory and are testing your edits to the package), load all functions using:
+```{r}
+# devtools::load_all()
+```
+
+Next, load the required dependencies:
+```{r}
+
+# First we will load our dependancies
+library(EntoInsights)
+library(lubridate)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+```
+
+### Using the record cleaner
+The data we will use in this tutorial is the first 100 rows of a automated monitoring dataset in the UK. This dataset is loaded into your library alongside the EntoInsights package.
+```{r}
+# Load an example classification dataset
+str(classifications_df)
+```
+
+The record cleaner function is called `append_RC_rules`. The function id designed to ingest datasets output from the species classification workflow, like the `classifications_df` object. To use the `append_RC_rules` function, you need the deployment's latitude and longitude.
+
+The record cleaner uses data from the National Biodiversity Network (NBN) Record Cleaner. Please reference them in your results. Please see the following link for more information: https://nbn.org.uk/tools-and-resources/nbn-record-cleaner/
+
+```{r}
+# Deployment position
+longitude = -1.6448439
+latitude = 51.6171655
+
+# Assign labels from the record cleaner rules 
+classifications_df_rc_rules = append_RC_rules(classifications_df, longitude, latitude)
+```
+
+Compare the differences between the original classification dataframe and what we have now:
+
+```{r}
+# Compare what we have added
+str(classifications_df)
+str(classifications_df_rc_rules)
+```
+
+As you can see, append_RC_rules, has inserted the following column:
+1. `top_x_species_identification_difficulty`: A number, from 1 - 4, indicating the degree to which the species is difficult to identify. Please see the key below:
+
+```{r, echo=FALSE}
+df <- data.frame(
+  Grade = 1:5,
+  Description = c(
+    "Generally distinctive species unlikely to be confused with other species. Records usually accepted within the normal flight period or geographical range; otherwise one or more good quality photographs, or possibly a specimen, may be required. Applies to species which will quickly become familiar to those gaining experience.",
+    "Can be confused with other species. Should not present any difficulty for experienced recorders; however, good quality photographs or a specimen will be required if the recorder is not familiar with the species, and experienced recorders may be expected to provide additional evidence if the species record is outside of the normal flight period or geographical range. Worn specimens (esp. micro-moths) are likely to be unidentifiable unless a specimen is retained for microscopic examination.",
+    "Very scarce species or species that are difficult to identify. A voucher specimen may be required by your County Recorder (seek advice before releasing the moth) particularly if the species record is outside of the normal flight period or geographical range. A good set of photographs showing all critical identification features clearly may suffice in some cases.",
+    "Species that can only be identified following critical assessment often involving dissection and examination of genitalia. A specimen should be retained for confirmation.",
+    "Ungraded."
+  )
+)
+kable(df, col.names = c("Grade", "Description"))
+```
+
+Note that due to the nature of the record cleaner function, species with 5 or NA values are ungraded.
+
+2. `top_x_species_presence`: Whether the species is present, with respect to its known activity. Note that species with NA values not included as entries in the Record cleaner rules.
+3. `top_x_species_within_date`: Whether the species is active at the given date, with respect to its known phenology.
+  
+The number after top_ matches the number of top predictions in the classification workflow. In our example dataset, there are 5 top predictions.
+
+You can use the results of the record cleaner to subset depending on your research needs. For example, we could subset out species that are at least somewhat visually distinctive. 
+
+```{r}
+classifications_df_rc_rules = classifications_df_rc_rules %>%
+filter(top_1_species_identification_difficulty < 3)
+```
+
+There are a couple considerations when using the record cleaner:
+
+First, identification difficulty, presence, and within date columns can contain NA values. These values indicate that the species currently lacks an entry in the record cleaner table. Note that species can have entries in one or two of the tables but not in the others (eg., an entry within identification difficulty and presence, but no entry in within date). Please consider this before subsetting by score, as you filter common species that lack entries in one or more of the tables.
+
+Second, the record cleaner was designed to flag unlikely identifications in citizen science records. It is not directly transferable for use in handling AI classification datasets, in that it is designed to flag occasional unlikely identifications, not extensive classifications of an unlikely species by a model. It has a broad range of acceptance of presence, or within date ranges, to account for rare events like second-generation spawnings, or the re-emergence of a species in regions where they were historically present. As a result, it can not be relied upon to fully filter out unlikely identifications of species.
+
+### Extracting datetime information
+Say you want to efficiently extract the datetimes of recording. Currently, the most straightforward method is to parse it from the filenames. Almost all files retain within the object store retain their datetimes in the filenames, and the function, `parse_AMI_datetimes` streamlines the extraction for you. To use this function, simply run the following. It will provide warnings for the number of rows that fail to parse the datetime.
+
+Note that we do not save the object as it we do not require datetime for subsequent functions.
+
+```{r}
+# Extract the time of recording
+classifications_df_rc_rules %>%
+mutate(capture_datetime = as.POSIXct(parse_AMI_datetimes(basename(image_path)), origin = "1970-01-01", tz = "UTC")) %>%
+head()
+```
+
+### Downloading snapshots
+
+*IMPORTANT:* The stages below require a credentials file. Please obtain one first from me at dylcar@ceh.ac.uk
+2. Download data, both snapshot images, and audible files, from the object store.
+3. From the snapshot images, we will extract crops of of choice species.
+
+Say you are handling some unusual classifications and you want to see their snapshots or crops. Or alternatively, you would like to obtain a subsample of crops for a small subset of days of sampling, or a subsample of audible and ultrasound recordings for your own classification workflow. The download and cropping functionality in this package can allow you to download obtain these files.
+
+This process requires an object store credentials json file. If you would like to generate this json, please run the following with your access key and secret key:
+```{r}
+# Create your credentials
+# create_credentials("my_access_key", "my_secret_key")
+```
+
+This will save a credentials JSON file within your working directory. Now you can download your classifications!
+
+Lets first isolate a subset of snapshot images.
+```{r}
+classifications_subset = classifications_df_rc_rules %>% slice_sample(n = 10)
+```
+
+To download snapshots, please use the `download_object_store_files` function. As input, you will need to provide:
+1. The bucket name (bucket): So far, this is always the ISO-3 code of the country, in lower case, e.g., 'gbr'.
+2. The deployment ID (deployment_id): The ID associated with the deployment. If you are uncertain of this, see the image_path of your classifications. The ID should be in the path. For example, 'dep000072' in './data/solar/gbr/dep000072/20240618024000-snapshot_crop0.jpg'. This is either a single value or a vector of values, one for each file (if you want to download multiple file types).
+3. The data type (data_type): The type of data, being either 'snapshot_images', 'motion_images' (rarely), 'ultrasound_recordings', or 'audible_recordings'. This is either a single value or a vector of values, one for each file (if you want to download multiple file types).
+4. The filenames of desired files (filename): This is the basename of the files. This will always be called 'image_path' inside the classifications tables. To obtain the basename without all the subfolders, please use the basename() function.
+
+Please note that this is an accessible but not particularly fast solution to downloading files. If you would like to donwload more than several thousand files, please see [here](https://github.com/AMI-system/object-store-scripts/tree/image_download)
+
+There are other parameters you can provide to futher customize your download. If you wish to know more of these, please see the function documentation.
+```{r}
+# Parameters for download
+bucket = "gbr"
+deployment_id = "dep000072"
+data_type = "snapshot_images"
+filenames = basename(classifications_subset$image_path)
+
+# Download the snapshots
+snapshot_download_log <- download_object_store_files(
+  bucket = bucket,
+  deployment_id = deployment_id,
+  data_type = data_type,
+  filename = filenames
+)
+```
+
+As raised in the warning message, please use your credentials carefully, as they currently give you write access to the contents of the object store. None of the functions in this package or vignette delete any files, so you can safely use these functions without deleting or modifying files, but please be careful when creating functions of your own that interact directly with the object store.
+
+You will have received the following outputs from this process:
+1. Snapshots in a 'downloads' directory: The snapshots are sorted into subfolders named after the deployment ID and data type. If you have downloaded files from multiple deployments please be careful about moving files between subfolders, as this will confuse subsequent download and cropping processes.
+2. files_downloaded_log.csv: This logs your deployment IDs, data types, and the local installation path and download status. The download status is either 'successfully downloaded', meaning the file has been downloaded to the download directory, 'already downloaded (skipped)' meaning the file already exists in the download directory, or 'failed download (see warnings)', meaning that there was an error that interrupted the download process. In the event that a download failed, the error message should print as a warning. If you cannot see this, please use the warnings() command to recover it.
+
+Likewise, if we want to download audio, we can run similar commands:
+```{r}
+# Parameters for download
+bucket = "gbr"
+deployment_id = "dep000072"
+data_type = "ultrasound_recordings" # this can alternatively be audible_recordings
+
+# Some file examples
+ultrasound_files = c("dep000072/ultrasound_recordings/SOLAR_20240716_002935.wav",
+"dep000072/ultrasound_recordings/SOLAR_20240716_013254.wav",
+"dep000072/ultrasound_recordings/SOLAR_20240716_013748.wav",
+"dep000072/ultrasound_recordings/SOLAR_20240716_021307.wav")
+
+# extract the basenames
+filenames = basename(ultrasound_files)
+
+audio_download_log <- download_object_store_files(
+  bucket = "gbr",
+  deployment_id = deployment_id,
+  data_type = data_type,
+  filename = filenames
+)
+```
+
+### Obtaining crops from downloaded snapshots
+
+To obtain crops, we need to provide the dataframe with all classifications from which we would like to extract crops, as well as the downloads directory (which is set to "./downloads" by default, and is therefore not specified in the example below). We can also provide the column name of the classifications for which we would like to extract crops. By default, this is "top_1_species", but say you want to extract crops and sort them by a different classification, you can specify the colymn name manually using the 'classifications_column' parameter. In the example below, we have specified 'order_name'. The crops will be extracted and saved within the "./crops" directory, sorted into subfolders by the class names.
+
+Each crop has an id after the class name, e.g., 6 in 'lepidoptera_macros_6.jpg'. This id, called the 'classification_id', and pairs the rows in the classifications dataframe with the crops. The classification id needs to first be generated. You can generate the classification_id column yourself alongside the deployment ID using the prepare_classifications_df function. This function is really simple, and assigns a classification_id based equal to the row number, and extracts the deployment ID from the file path. 
+
+```{r}
+# Extract the classification id and deployment id from the dataframe
+classifications_df_rc_rules = prepare_classifications_df(classifications_df_rc_rules)
+
+crop_and_save_images(classifications_df = classifications_df_rc_rules, classifications_column = "order_name")
+```
+
+Note that the 'crop_and_save_images' function by default saves the classifications dataframe as 'classifications_crops_pairings.csv'.

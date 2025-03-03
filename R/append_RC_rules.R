@@ -107,7 +107,7 @@ append_RC_rules <- function(classifications_df, longitude, latitude) {
                 distinct() %>%
                 mutate(join_species_name = gsub("-", " ", tolower(!!sym(col)))) %>%
                 left_join(id_difficulty, by = "join_species_name") %>%
-                mutate(presence = ifelse(join_species_name %in% tenkm_site$join_species_name, 1, 0)) %>%
+                mutate(presence = ifelse(join_species_name %in% tenkm_site$join_species_name, 1, ifelse(join_species_name %in% unique(tenkm$join_species_name), 0, NA))) %>%
                 left_join(periodwithinyear, by = "join_species_name") %>%
                 mutate(
                     within_date = ifelse(
@@ -139,7 +139,7 @@ append_RC_rules <- function(classifications_df, longitude, latitude) {
     }
 
     # Remove the date columns I used previously
-    classifications_df = classifications_df %>% select(-c(observation_date, observation_month, observation_day))
+    classifications_df = classifications_df %>% select(-c(join_species_name, observation_date, observation_month, observation_day))
     
     return(classifications_df)
 }

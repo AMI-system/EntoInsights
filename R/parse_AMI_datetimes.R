@@ -32,5 +32,13 @@ parse_AMI_datetimes <- function(file_names) {
   datetime_str <- str_replace_all(datetime_str, "_", "")
   
   # Convert to datetime
-  parse_date_time(datetime_str, orders = c("YmdHMS"), tz = "UTC")
+  datetimes = parse_date_time(datetime_str, orders = c("YmdHMS"), tz = "UTC")
+
+  # Show warnings if there are NA values
+  NA_tally = sum(is.na(datetimes))
+  if(NA_tally > 0){
+    warning("There are ", NA_tally, " NA values in the output datetime vector")
+  }
+
+  return(datetimes)
 }
