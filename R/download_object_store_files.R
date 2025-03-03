@@ -1,16 +1,15 @@
 #' Download files from an S3 bucket
 #'
-#' This function downloads files from an S3 bucket given a list of deployment IDs,
-#' data types, filenames, and classification IDs. Files are downloaded in parallel.
+#' This function downloads files from an S3 bucket based on provided vectors of deployment IDs,
+#' data types, and filenames. The files are downloaded in parallel with the function outputting a log with the final download status of each file.
 #'
 #' @param bucket Character. Name of the S3 bucket.
 #' @param deployment_id Character vector or single value. Deployment ID corresponding to each file.
 #' @param data_type Character vector or single value. Data type(s) corresponding to each file.
 #' @param filename Character vector. List of filenames to download.
-#' @param classification_id Numeric or character vector. Vector of classification IDs. This will often be your row number.
 #' @param download_path Character. Local directory where files will be downloaded. Default is "./downloads".
 #' @param credentials_path Character. Path to credentials file JSON.
-#' @param save_download_log Logical. Whether to save download log.
+#' @param save_download_log Logical. Whether to save the download log.
 #' @import jsonlite
 #' @import tibble
 #' @import fs
@@ -18,9 +17,9 @@
 #' @import future
 #' @import purrr
 #' @import paws.storage
-#' @return A data frame containing deployment IDs, data types, local file paths, classification IDs, and download status.
+#' @return A data frame containing deployment IDs, data types, local file paths, and download status. The download status is either, 'successfully downloaded' meaning the file has been downloaded to the download directory, 'already downloaded (skipped)' meaning the file already exists in the download directory, or 'failed download (see warnings)'. This means that there was an error that interrupted the download process. Please check the last warnings with warnings() for more details.
 #' @export
-download_object_store_files <- function(bucket, deployment_id, data_type, filename, classification_id, 
+download_object_store_files <- function(bucket, deployment_id, data_type, filename, 
                                         download_path = "./downloads", credentials_path = "./credentials.json", 
                                         save_download_log = TRUE) {
   
@@ -43,13 +42,12 @@ download_object_store_files <- function(bucket, deployment_id, data_type, filena
     deployment_id <- rep(deployment_id, length(filename))
   }
   
-  # Create a dataframe from inputs
+  # Create a dataframe from inputs and make them distinct to avoid downloading duplicate files
   file_details_df <- tibble(
     deployment_id = deployment_id,
     data_type = data_type,
-    filename = filename,
-    classification_id = classification_id
-  )
+    filename = filename) %>%
+    distinct()
   
   # Initialize S3 client
   aws_credentials <- fromJSON(credentials_path)
@@ -83,7 +81,6 @@ download_object_store_files <- function(bucket, deployment_id, data_type, filena
       deployment_id <- row$deployment_id
       data_type <- row$data_type
       filename <- row$filename
-      classification_id <- row$classification_id
       
       # Construct the S3 key and local download path
       key <- file.path(deployment_id, data_type, filename)
@@ -94,11 +91,11 @@ download_object_store_files <- function(bucket, deployment_id, data_type, filena
 
       # Check if file already exists before downloading
       if (file_exists(local_path)) {
-        message("File already donwloaded, skipping: ", key)
+        message("File already downloaded, skipping: ", key)
         return(data.frame(deployment_id = deployment_id, 
                           data_type = data_type, 
                           local_path = local_path, 
-                          classification_id = classification_id,
+                          download_status = "already downloaded (skipped)",
                           stringsAsFactors = FALSE))
       }
 
@@ -109,15 +106,18 @@ download_object_store_files <- function(bucket, deployment_id, data_type, filena
           Key = key
         )
         writeBin(object$Body, local_path)
-        message("Downloaded: ", key)
         return(data.frame(deployment_id = deployment_id, 
                           data_type = data_type, 
                           local_path = local_path, 
-                          classification_id = classification_id,
+                          download_status = "successfully downloaded",
                           stringsAsFactors = FALSE))
       }, error = function(e) {
         Warning("Error downloading ", key, ": ", e$message)
-        return(NULL)
+        return(data.frame(deployment_id = deployment_id, 
+                  data_type = data_type, 
+                  local_path = local_path, 
+                  download_status = "failed download (see warnings)",
+                  stringsAsFactors = FALSE))
       })
     },
     .options = furrr_options(seed = TRUE)  # Ensure reproducibility

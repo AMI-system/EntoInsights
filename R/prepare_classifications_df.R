@@ -16,6 +16,14 @@
 #' @import stringr
 #' @export
 prepare_classifications_df <- function(classifications_df) {
+
+    if("deployment_id" %in% colnames(classifications_df)){
+        classifications_df = classifications_df %>% select(-deployment_id)
+    }
+
+    if("classification_id" %in% colnames(classifications_df)){
+        classifications_df = classifications_df %>% select(-classification_id)
+    }
   
     classifications_df <- classifications_df %>%
         mutate(deployment_id = str_extract(image_path, "dep\\d{6}"),

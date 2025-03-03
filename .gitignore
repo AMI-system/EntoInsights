@@ -30,3 +30,5 @@ inst/doc
 cheatsheet.Rmd
 downloads
 files_downloaded_log.csv
+crops
+classifications_crops_pairings.csv

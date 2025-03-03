@@ -9,7 +9,6 @@ download_object_store_files(
   deployment_id,
   data_type,
   filename,
-  classification_id,
   download_path = "./downloads",
   credentials_path = "./credentials.json",
   save_download_log = TRUE
@@ -24,18 +23,16 @@ download_object_store_files(
 
 \item{filename}{Character vector. List of filenames to download.}
 
-\item{classification_id}{Numeric or character vector. Vector of classification IDs. This will often be your row number.}
-
 \item{download_path}{Character. Local directory where files will be downloaded. Default is "./downloads".}
 
 \item{credentials_path}{Character. Path to credentials file JSON.}
 
-\item{save_download_log}{Logical. Whether to save download log.}
+\item{save_download_log}{Logical. Whether to save the download log.}
 }
 \value{
-A data frame containing deployment IDs, data types, local file paths, classification IDs, and download status.
+A data frame containing deployment IDs, data types, local file paths, and download status. The download status is either, 'successfully downloaded' meaning the file has been downloaded to the download directory, 'already downloaded (skipped)' meaning the file already exists in the download directory, or 'failed download (see warnings)'. This means that there was an error that interrupted the download process. Please check the last warnings with warnings() for more details.
 }
 \description{
-This function downloads files from an S3 bucket given a list of deployment IDs,
-data types, filenames, and classification IDs. Files are downloaded in parallel.
+This function downloads files from an S3 bucket based on provided vectors of deployment IDs,
+data types, and filenames. The files are downloaded in parallel with the function outputting a log with the final download status of each file.
 }

@@ -6,7 +6,7 @@
 #' (e.g., `top_1_species`, `top_2_species`, etc.) and appends spatial presence, phenology, and identification difficulty for each classification separately.
 #' Note, currently this application of the record cleaner does not assess results collected in Northern Ireland.
 #'
-#' @param classification_df A dataframe containing classifications. This dataset assumes the data is in the format obtained from the classification pipeline on JASMIN.
+#' @param classifications_df A dataframe containing classifications. This dataset assumes the data is in the format obtained from the classification pipeline on JASMIN.
 #' @param latitude Latitude of the deployment.
 #' @param longitude Longitude of the deployment.
 #'
@@ -23,7 +23,7 @@
 #' @import stringr
 #' @import lubridate
 #' @export
-append_RC_rules <- function(classification_df, longitude, latitude) {
+append_RC_rules <- function(classifications_df, longitude, latitude) {
 
     # Access datasets directly from the package
     data("difficulty_description", package = "EntoInsights")
@@ -89,8 +89,8 @@ append_RC_rules <- function(classification_df, longitude, latitude) {
         mutate(km10_list = str_split(km10, " ")) %>%
         filter(grid_ref$km10 %in% unlist(km10_list))
 
-    # Process classification_df
-    classification_df <- classification_df %>%
+    # Process classifications_df
+    classifications_df <- classifications_df %>%
         mutate(
             observation_date = as.Date(parse_AMI_datetimes(image_path), format = "%Y%m%d"),
             observation_month = month(observation_date),
@@ -98,11 +98,11 @@ append_RC_rules <- function(classification_df, longitude, latitude) {
         )
 
     # Loop through columns that match 'top_X_species'
-    for (col in colnames(classification_df)) {
+    for (col in colnames(classifications_df)) {
         if (grepl("^top_\\d+_species$", col)) {
 
             # Create a species lookup for the current column
-            species_lookup_df <- classification_df %>%
+            species_lookup_df <- classifications_df %>%
                 select(observation_date, observation_month, observation_day, !!sym(col)) %>%
                 distinct() %>%
                 mutate(join_species_name = gsub("-", " ", tolower(!!sym(col)))) %>%
@@ -131,16 +131,16 @@ append_RC_rules <- function(classification_df, longitude, latitude) {
                     !!paste0(col, "_within_date") := within_date
                 )
 
-            # Merge the lookup back into classification_df
-            classification_df <- classification_df %>%
+            # Merge the lookup back into classifications_df
+            classifications_df <- classifications_df %>%
                 mutate(join_species_name = gsub("-", " ", tolower(!!sym(col)))) %>%
                 left_join(species_lookup_df)
         }
     }
 
     # Remove the date columns I used previously
-    classification_df = classification_df %>% select(-c(join_species_name, observation_date, observation_month, observation_day))
+    classifications_df = classifications_df %>% select(-c(join_species_name, observation_date, observation_month, observation_day))
     
-    return(classification_df)
+    return(classifications_df)
 }
 
