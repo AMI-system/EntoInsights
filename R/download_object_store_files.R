@@ -10,13 +10,13 @@
 #' @param download_path Character. Local directory where files will be downloaded. Default is "./downloads".
 #' @param credentials_path Character. Path to credentials file JSON.
 #' @param save_download_log Logical. Whether to save the download log.
-#' @import jsonlite
 #' @import tibble
 #' @import fs
 #' @import furrr
 #' @import future
 #' @import purrr
-#' @import paws.storage
+#' @import paws
+#' @importFrom jsonlite fromJSON
 #' @return A data frame containing deployment IDs, data types, local file paths, and download status. The download status is either, 'successfully downloaded' meaning the file has been downloaded to the download directory, 'already downloaded (skipped)' meaning the file already exists in the download directory, or 'failed download (see warnings)'. This means that there was an error that interrupted the download process. Please check the last warnings with warnings() for more details.
 #' @export
 download_object_store_files <- function(bucket, deployment_id, data_type, filename, 

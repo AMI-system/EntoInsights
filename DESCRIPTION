@@ -8,10 +8,18 @@ Authors@R: c(
 Description: The EntoInsights R package provides functions for wrangling, analysing, and visualising entomological datasets generated from AI-based insect identifications, such as those produced by AMI (Automated Monitoring of Insects). 
 Imports:
     dplyr,
+    fs,
+    furrr,
+    future,
+    httr,
     jsonlite,
     lubridate,
+    magick,
+    paws,
+    purrr,
     sf,
-    stringr
+    stringr,
+    tibble
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8

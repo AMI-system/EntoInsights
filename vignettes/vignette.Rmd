@@ -39,7 +39,7 @@ Next, load the required dependencies:
 ```{r}
 
 # First we will load our dependancies
-library(EntoInsights)
+#library(EntoInsights)
 library(lubridate)
 library(dplyr)
 library(stringr)

@@ -13,7 +13,6 @@
 #' 
 #' @return NULL
 #'
-#' @import httr
 #' @import paws
 #' @import furrr
 #' @import fs
@@ -114,6 +113,6 @@ crop_and_save_images <- function(downloaded_files_dir = "./downloads", classific
     message("classifications and crops pairings saved as 'classifications_crops_pairings.csv'")
   }
 
-  return(NULL)
+  invisible(NULL)
 
 }
