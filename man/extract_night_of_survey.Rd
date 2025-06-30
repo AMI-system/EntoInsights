@@ -4,16 +4,14 @@
 \alias{extract_night_of_survey}
 \title{Extract Night of Survey}
 \usage{
-extract_night_of_survey(timestamp, start_time, end_time, timezone)
+extract_night_of_survey(timestamp, start_time, timezone)
 }
 \arguments{
+\item{timestamp}{A string specifying the name of the timestamp column.}
+
 \item{start_time}{A string representing the survey start time (e.g., "18:00" or "18:30").}
 
 \item{end_time}{A string representing the survey end time (e.g., "06:00" or "06:30").}
-
-\item{data}{A dataframe containing a column with timestamps.}
-
-\item{timestamp_col}{A string specifying the name of the timestamp column.}
 
 \item{time_zone}{A string representing the timezone of the start and end time (e.g., "UTC").}
 }

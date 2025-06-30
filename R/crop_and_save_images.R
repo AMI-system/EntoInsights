@@ -13,7 +13,6 @@
 #' 
 #' @return NULL
 #'
-#' @import httr
 #' @import paws
 #' @import furrr
 #' @import fs
@@ -86,7 +85,7 @@ crop_and_save_images <- function(downloaded_files_dir = "./downloads", classific
 
       # Check if species name is valid
       if (is.na(class_name) || is.null(class_name) || class_name == "") {
-        stop("Some values in column, ", classifications_column,  ", are empty (NA, NULL, or empty strings)")
+        stop("For this image, some values in column, ", classifications_column,  ", are empty (NA, NULL, or empty strings)")
       }
 
       # Create class specific output directory
@@ -104,7 +103,8 @@ crop_and_save_images <- function(downloaded_files_dir = "./downloads", classific
       message("Cropped and saved: ", output_path)
     }
   }, error = function(e) {
-    message("Error processing file: ", download_file_path, ". Error: ", e$message)
+    
+    message("Error processing file: ", download_path, ". Error: ", e$message)
   })
 })
 
@@ -114,6 +114,6 @@ crop_and_save_images <- function(downloaded_files_dir = "./downloads", classific
     message("classifications and crops pairings saved as 'classifications_crops_pairings.csv'")
   }
 
-  return(NULL)
+  invisible(NULL)
 
 }

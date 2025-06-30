@@ -5,10 +5,8 @@
 #' @param access_key_id A string containing the AWS Access Key ID.
 #' @param secret_access_key A string containing the AWS Secret Access Key.
 #' @param file_path A string specifying the file path where the JSON file should be saved. Default is "credentials.json".
-#'
-#' 
 #' @return The function writes a JSON file to the specified location and returns the file path.
-#' @import jsonlite
+#' @importFrom jsonlite write_json
 #'
 #' @examples
 #' create_credentials("my_access_key", "my_secret_key")
