@@ -2,37 +2,85 @@
 % Please edit documentation in R/get_hourly_env_data.R
 \name{get_hourly_env_data}
 \alias{get_hourly_env_data}
-\title{Download Hourly Temperature Data from NASA POWER API}
+\title{Download Hourly Environmental Data from NASA POWER API with Elevation + Moonlight}
 \usage{
-get_hourly_env_data(latitudes, longitudes, start_datetime, end_datetime)
+get_hourly_env_data(
+  latitudes,
+  longitudes,
+  start_datetime,
+  end_datetime,
+  derive_e_from_elevation = TRUE,
+  e_default = 0.28
+)
 }
 \arguments{
-\item{latitudes}{Numeric. A single latitude or a vector of latitudes.}
+\item{latitudes}{Numeric vector of latitudes.}
 
-\item{longitudes}{Numeric. A single longitude or a vector of longitudes,
-corresponding to each latitude.}
+\item{longitudes}{Numeric vector of longitudes (same length as \code{latitudes}).}
 
-\item{start_datetime}{POSIXct or Date. Start of the time range.}
+\item{start_datetime}{POSIXct (with time zone). Start of range.}
 
-\item{end_datetime}{POSIXct or Date. End of the time range.}
+\item{end_datetime}{POSIXct (with time zone). End of range.}
+
+\item{derive_e_from_elevation}{Logical. If \code{TRUE} (default), map elevation to
+extinction coefficient \code{e} using buckets: elevation < 500 m → 0.28; < 1000 m
+→ 0.24; < 2000 m → 0.21; ≥ 2000 m → 0.16. If \code{FALSE}, use \code{e_default}.}
+
+\item{e_default}{Numeric. Extinction coefficient used when \code{derive_e_from_elevation = FALSE}. Default \code{0.28}.}
 }
 \value{
-A data.frame with columns: \code{latitude}, \code{longitude},
-\code{datetime}, \code{temperature_2m} (in degrees Celsius).
+A \code{data.frame} with one row per site-hour containing:
+\itemize{
+\item \code{latitude}, \code{longitude}
+\item \code{datetime} (local time zone from the inputs)
+\item Environmental variables (renamed):
+\itemize{
+\item \code{temperature_2m} (from \code{T2M}, °C)
+\item \code{wind_speed_2m} (from \code{WS2M}, m/s)
+\item \code{wind_direction_2m} (from \code{WD2M}, degrees from North)
+\item \code{preparation_corrected} (from \code{PRECTOTCORR}, mm/hr)
+\item \code{relative_humidity_2m} (from \code{RH2M}, \\%)
+\item \code{cloud_amount} (from \code{CLOUD_AMT}, \\%)
+\item \code{root_soil_wetness} (from \code{GWETROOT}, 0–1)
+\item \code{surface_soil_wetness} (from \code{GWETTOP}, 0–1)
+}
+\item \code{elevation} (metres)
+\item \code{extinction_coefficient} (mapped \code{e})
+\item \code{night} (logical), \code{moonlight_model} (relative to average full moon),
+\code{moon_phase} (\\% illuminated)
+}
 }
 \description{
-Queries the NASA POWER API to download hourly 2-metre temperature (T2M) data
-for one or more locations between a start and end date-time. Results are
-returned as a merged data.frame with temperature values for each hour and location.
+Downloads hourly environmental data from the NASA POWER API for one or more
+locations, appends site elevation (via \strong{elevatr}), and adds moonlight
+fields from \strong{moonlit} (\code{night}, \code{moonlightModel}, \code{moonPhase}).
+
+Time zones are handled as follows:
+\enumerate{
+\item The user-supplied \code{start_datetime} and \code{end_datetime} (with an explicit
+time zone) are converted to \strong{UTC} to build the POWER API request window
+(YYYYMMDD).
+\item After retrieval, timestamps are \strong{back-converted} to the original local
+time zone and filtered to the exact interval.
+\item Moonlight calculations are performed on the \strong{local} datetimes, as
+expected by \code{moonlit::calculateMoonlightIntensity()}.
+}
 }
 \examples{
 \dontrun{
-result <- get_power_hourly_temp(
-  latitudes = c(39.9373, 10.9373),
-  longitudes = c(-83.0485, -50.0485),
-  start_datetime = as.POSIXct("2015-01-01 00:00:00"),
-  end_datetime = as.POSIXct("2015-01-02 00:00:00")
+result <- get_hourly_env_data(
+  latitudes = c(9.163544, 9.1619212),
+  longitudes = c(-79.8378812, -79.8388263),
+  start_datetime = as.POSIXct("2024-04-01 00:00:00", tz = "America/Panama"),
+  end_datetime = as.POSIXct("2024-08-01 23:59:59", tz = "America/Panama")
 )
-head(result)
+}
+
+}
+\seealso{
+\itemize{
+\item NASA POWER API (temporal/hourly/point): https://power.larc.nasa.gov/
+\item \code{moonlit::calculateMoonlightIntensity}
+\item \code{elevatr::get_elev_point}
 }
 }
