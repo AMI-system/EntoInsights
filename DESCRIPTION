@@ -19,7 +19,11 @@ Imports:
     purrr,
     sf,
     stringr,
-    tibble
+    tibble,
+    parallel,
+    moonlit,
+    elevatr,
+    glue
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8
@@ -34,3 +38,5 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
+remotes:
+    msmielak/moonlit
