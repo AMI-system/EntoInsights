@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_hourly_env_data.R
 \name{get_hourly_env_data}
 \alias{get_hourly_env_data}
-\title{Download Hourly Environmental Data from NASA POWER API with Elevation + Moonlight}
+\title{Download Hourly Environmental Data from NASA POWER API with Elevation and Moonlight}
 \usage{
 get_hourly_env_data(
   latitudes,
@@ -18,69 +18,112 @@ get_hourly_env_data(
 
 \item{longitudes}{Numeric vector of longitudes (same length as \code{latitudes}).}
 
-\item{start_datetime}{POSIXct (with time zone). Start of range.}
+\item{start_datetime}{POSIXct (with local time zone). Start of range.}
 
-\item{end_datetime}{POSIXct (with time zone). End of range.}
+\item{end_datetime}{POSIXct (with local time zone). End of range.}
 
 \item{derive_e_from_elevation}{Logical. If \code{TRUE} (default), map elevation to
-extinction coefficient \code{e} using buckets: elevation < 500 m → 0.28; < 1000 m
-→ 0.24; < 2000 m → 0.21; ≥ 2000 m → 0.16. If \code{FALSE}, use \code{e_default}.}
+atmospheric extinction coefficient \code{e} using buckets:
+elevation < 500 m → 0.28; < 1000 m → 0.24; < 2000 m → 0.21; ≥ 2000 m → 0.16.
+If \code{FALSE}, use \code{e_default}.}
 
-\item{e_default}{Numeric. Extinction coefficient used when \code{derive_e_from_elevation = FALSE}. Default \code{0.28}.}
+\item{e_default}{Numeric. Extinction coefficient used when
+\code{derive_e_from_elevation = FALSE}. Default \code{0.28}.}
 }
 \value{
 A \code{data.frame} with one row per site-hour containing:
 \itemize{
-\item \code{latitude}, \code{longitude}
-\item \code{datetime} (local time zone from the inputs)
-\item Environmental variables (renamed):
+\item \strong{latitude}, \strong{longitude}
+\item \strong{datetime} — local datetime (same time zone as inputs)
+\item \strong{Environmental variables} (renamed from POWER):
 \itemize{
-\item \code{temperature_2m} (from \code{T2M}, °C)
-\item \code{wind_speed_2m} (from \code{WS2M}, m/s)
-\item \code{wind_direction_2m} (from \code{WD2M}, degrees from North)
-\item \code{preparation_corrected} (from \code{PRECTOTCORR}, mm/hr)
-\item \code{relative_humidity_2m} (from \code{RH2M}, \\%)
-\item \code{cloud_amount} (from \code{CLOUD_AMT}, \\%)
-\item \code{root_soil_wetness} (from \code{GWETROOT}, 0–1)
-\item \code{surface_soil_wetness} (from \code{GWETTOP}, 0–1)
+\item \strong{temperature_2m} — 2-metre air temperature, in °C (from \code{T2M});
+i.e., how warm the air is at about head height.
+\item \strong{wind_speed_2m} — wind speed at 2 m, in m/s (from \code{WS2M});
+i.e., how fast the wind is blowing near the ground.
+\item \strong{wind_direction_2m} — wind direction at 2 m, in degrees from
+\emph{true north} (0–360; meteorological convention: direction the
+wind is coming \emph{from}) (from \code{WD2M});
+i.e., where the wind is blowing from.
+\item \strong{precipitation_corrected} — precipitation rate, in mm/hour
+(bias-corrected; from \code{PRECTOTCORR});
+i.e., how much rainfall is falling each hour.
+\item \strong{relative_humidity_2m} — relative humidity at 2 m, in \\%
+(from \code{RH2M});
+i.e., how close the air is to being saturated with moisture.
+\item \strong{cloud_amount} — total cloud amount, in \\% (from \code{CLOUD_AMT});
+i.e., what fraction of the sky is covered by cloud.
+\item \strong{root_soil_wetness} — root-zone soil wetness, 0–1 fraction
+(from \code{GWETROOT});
+i.e., moisture in the plant root zone.
+\item \strong{surface_soil_wetness} — top-soil wetness, 0–1 fraction
+(from \code{GWETTOP});
+i.e., moisture right at the soil surface.
 }
-\item \code{elevation} (metres)
-\item \code{extinction_coefficient} (mapped \code{e})
-\item \code{night} (logical), \code{moonlight_model} (relative to average full moon),
-\code{moon_phase} (\\% illuminated)
+\item \strong{elevation} — site elevation, in metres (from \strong{elevatr});
+i.e., how high the site is above sea level.
+\item \strong{extinction_coefficient} — atmospheric extinction coefficient \code{e}
+(dimensionless); used by \strong{moonlit} to estimate how much the atmosphere
+dims moonlight at a given altitude.
+\item \strong{night} — logical; \code{TRUE} if it is night at the site (from \strong{moonlit}).
+\item \strong{moonlight_model} — relative moonlight intensity (dimensionless);
+scaled so that ~1 represents the average full-moon brightness under
+clear conditions; values can be above or below 1.
+\item \strong{moon_phase} — lunar disc illumination, in \\% (0 = new moon,
+100 = full moon).
 }
 }
 \description{
 Downloads hourly environmental data from the NASA POWER API for one or more
-locations, appends site elevation (via \strong{elevatr}), and adds moonlight
-fields from \strong{moonlit} (\code{night}, \code{moonlightModel}, \code{moonPhase}).
+locations, appends site elevation (via elevatr), and adds moonlight
+fields from moonlit (\code{night}, \code{moonlight_model}, \code{moon_phase}).
 
-Time zones are handled as follows:
+\strong{Time zones}
 \enumerate{
 \item The user-supplied \code{start_datetime} and \code{end_datetime} (with an explicit
-time zone) are converted to \strong{UTC} to build the POWER API request window
+time zone) are converted to UTC to build the POWER API request window
 (YYYYMMDD).
-\item After retrieval, timestamps are \strong{back-converted} to the original local
+\item After retrieval, timestamps are back-converted to the original local
 time zone and filtered to the exact interval.
-\item Moonlight calculations are performed on the \strong{local} datetimes, as
+\item Moonlight calculations are performed on the local datetimes, as
 expected by \code{moonlit::calculateMoonlightIntensity()}.
 }
 }
+\details{
+Environmental variables are obtained from the NASA POWER “RE” community,
+hourly temporal resolution, at each requested point. Elevation is retrieved
+from AWS Terrain Tiles via elevatr. Moonlight metrics are computed with
+moonlit using local datetimes and the site-specific extinction coefficient.
+
+For full parameter definitions and metadata, see the POWER parameter catalogue:
+\url{https://power.larc.nasa.gov/parameters/}.
+}
 \examples{
 \dontrun{
+# 1) Basic download for two nearby sites (Panama, local time)
 result <- get_hourly_env_data(
   latitudes = c(9.163544, 9.1619212),
   longitudes = c(-79.8378812, -79.8388263),
   start_datetime = as.POSIXct("2024-04-01 00:00:00", tz = "America/Panama"),
-  end_datetime = as.POSIXct("2024-08-01 23:59:59", tz = "America/Panama")
+  end_datetime   = as.POSIXct("2024-08-01 23:59:59", tz = "America/Panama")
 )
 }
 
 }
+\references{
+Smielak M (2024). \emph{moonlit: Predicting moonlight intensity for given time and location}.
+R package version 0.1.0, commit 211e8f554a9b388ded79a70344c504349f23d8a8,
+\url{https://github.com/msmielak/moonlit}.
+
+Hollister J, Shah T, Nowosad J, Robitaille A, Beck M, Johnson M (2023).
+\emph{elevatr: Access Elevation Data from Various APIs}. doi:10.5281/zenodo.8335450
+\url{https://doi.org/10.5281/zenodo.8335450}, R package version 0.99.0,
+\url{https://github.com/jhollist/elevatr/}.
+}
 \seealso{
 \itemize{
-\item NASA POWER API (temporal/hourly/point): https://power.larc.nasa.gov/
-\item \code{moonlit::calculateMoonlightIntensity}
-\item \code{elevatr::get_elev_point}
+\item NASA POWER parameters: \url{https://power.larc.nasa.gov/parameters/}
+\item \code{moonlit::calculateMoonlightIntensity} — \url{https://github.com/msmielak/moonlit}
+\item \code{elevatr::get_elev_point} — \url{https://cran.r-project.org/web/packages/elevatr/index.html}
 }
 }
