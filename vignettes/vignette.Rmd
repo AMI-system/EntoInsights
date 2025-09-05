@@ -30,9 +30,9 @@ Note, if you are using this guide, it is either because:
   
 2. You would like to obtain acoustic data for classifications methods of your own.
 
-If you are in the first situation, please go through the report from top to bottom, but skip the section, **Retreiving deployment metadata, listing files within deployments, and downloading files** as this is not relevant to your needs.
+If you are in the first situation, please go through the report from top to bottom, but skip the section, **Retrieving deployment metadata, listing files within deployments, and downloading files** as this is not relevant to your needs.
 
-If you are in the second situation, please complete the setup and review the code of conduct then skip to the **Retreiving deployment metadata, listing files within deployments, and downloading files** as the parts inbetween are unlikely to be relevant to your work.
+If you are in the second situation, please complete the setup and review the code of conduct then skip to the **Retrieving deployment metadata, listing files within deployments, and downloading files** as the parts between are unlikely to be relevant to your work.
 
 **CODE OF CONDUCT**
 
@@ -46,7 +46,7 @@ Any breach of this will lead to us invalidating your credentials.
 
 **Disclaimer on downloading data**
 
-Please note that downloading data, particularly high frequency acoustic files, is really time consuming as the files are large and numerous. You will need many hours (sometimes days) to retreive all data under a deployment. If you want to save time, I'd recommend that you instead download only subsets of files, such as files between larger time intervals (e.g., the first file captured every hour). Likewise, if the total file size across your deployments are larger than your storage capacity, consider designing a pipeline that deletes the raw data files after processing them.
+Please note that downloading data, particularly high frequency acoustic files, is really time consuming as the files are large and numerous. You will need many hours (sometimes days) to retrieve all data under a deployment. If you want to save time, I'd recommend that you instead download only subsets of files, such as files between larger time intervals (e.g., the first file captured every hour). Likewise, if the total file size across your deployments are larger than your storage capacity, consider designing a pipeline that deletes the raw data files after processing them.
 
 ### Setup
 
@@ -65,7 +65,7 @@ Next, load the other required packages for this vignette:
 
 ```{r}
 
-# First we will load our dependancies
+# First we will load our dependencies
 library(lubridate)
 library(dplyr)
 library(stringr)
@@ -166,7 +166,7 @@ classifications_subset = classifications_df_rc_rules %>% slice_sample(n = 10)
 
 To download snapshots, please use the `download_object_store_files` function. As input, you will need to provide:
 
-1. The bucket name (bucket): In most instances this is the ISO-3 code of the country, in lower case, e.g., `gbr`. The exeption is the saltmarsh soundscapes project which is `saltmarsh-soundscapes`.
+1. The bucket name (bucket): In most instances this is the ISO-3 code of the country, in lower case, e.g., `gbr`. The exception is the saltmarsh soundscapes project which is `saltmarsh-soundscapes`.
 
 2. The deployment ID (deployment_id): The ID associated with the deployment. If you are uncertain of this, see the image_path of your classifications. The ID should be in the path. For example, `dep000072` in `./data/solar/gbr/dep000072/20240618024000-snapshot.jpg`. This is either a single value or a vector of values, one for each file (if you want to download files across multiple deployments).
 
@@ -212,7 +212,7 @@ crop_and_save_images(classifications_df = classifications_df_rc_rules, classific
 
 Note that the `crop_and_save_images` function by default saves the classifications dataframe, including the classification_id column, as `classifications_crops_pairings.csv`.
 
-### Retreiving deployment metadata, listing files within deployments, and downloading files
+### Retrieving deployment metadata, listing files within deployments, and downloading files
 
 The following section will allow you to:
 
@@ -224,7 +224,7 @@ The following section will allow you to:
 
 This section will be most relevant to users conducting their own acoustic analysis, who do not have a classifications dataframe listing file paths.
 
-The first function will allow you to obtain all deployments directly from the API. Because the deployments are retreived from the API `get-deployments` endpoint they will always be the most up to date version. To access the API, you will need to provide the API username and password. This is separate from the credentials. If you have uploaded data in the past, this is the username and password quoted in the upload guidelines document. If you are uncertain of the username and password, please contact [Tom August](tomaug@ceh.ac.uk) to request access.
+The first function will allow you to obtain all deployments directly from the API. Because the deployments are retrieved from the API `get-deployments` endpoint they will always be the most up to date version. To access the API, you will need to provide the API username and password. This is separate from the credentials. If you have uploaded data in the past, this is the username and password quoted in the upload guidelines document. If you are uncertain of the username and password, please contact [Tom August](tomaug@ceh.ac.uk) to request access.
 
 ```{r}
 
@@ -290,7 +290,7 @@ head(dep000061_snapshot_ultrasound_files_download_log)
 
 ```
 
-### Extract environmental variables
+### Extracting environmental variables
 
 Finally, EntoInsights can allow users to query the NASA power API for hourly environmental variables to support their analysis. The NASA power API offers users the ability to freely query meteorlogical variables. A full list of available variables can be found [here](https://power.larc.nasa.gov/parameters/). Currently, we extract the following parameters and their definitions:
 
@@ -326,7 +326,7 @@ Finally, EntoInsights can allow users to query the NASA power API for hourly env
 
 If you want to extract more variables, you can always edit the `parameters` variable inside the `get_hourly_env_data` function. 
 
-Obtaining the hourly environmental variables data is straightforward - you just need to provide the decimal latitude and longitudes of the deployments, either as a vector for multiple deployments, or as a single numeric value. Additionally, you need to provide the start and end datetime of the recording range. **It is essential here that you specify the timezone of the local region**. If you do not, then the output time environmental variables will not be time adjusted to your region. You will see some messaging regarding the timezone. The function will tell you the timezone that it is handling, as confirmation that you have provided it correctly, then if it is not UTC, convert the time into UTC. This is done because the NASA power API requires the times be provided as UTC. Later, it will backconvert the returned times to the original timezone. The output dataframe will be provided to you in your local timezone.
+Obtaining the hourly environmental variables data is straightforward - you just need to provide the decimal latitude and longitudes of the deployments, either as a vector for multiple deployments, or as a single numeric value. Additionally, you need to provide the start and end datetime of the recording range. **It is essential here that you specify the timezone of the local region**. If you do not, then the output time environmental variables will not be time adjusted to your region. You will see some messaging regarding the timezone. The function will tell you the timezone that it is handling, as confirmation that you have provided it correctly, then if it is not UTC, convert the time into UTC. This is done because the NASA power API requires the times be provided as UTC. Later, it will back convert the returned times to the original timezone. The output dataframe will be provided to you in your local timezone.
 
 ```{r}
 
