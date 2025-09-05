@@ -66,7 +66,8 @@ get_deployment_metadata <- function(api_username,
 
   # rename deployment_columns
   out = tibble::as_tibble(parsed) %>%
-  rename(bucket = country_code, latitude = lat, longitude = lon)
+  rename(bucket = country_code, latitude = lat, longitude = lon) %>%
+  mutate(latitude = suppressWarnings(as.numeric(trimws(latitude))), longitude = suppressWarnings(as.numeric(trimws(longitude))))
 
   return(out)
 }

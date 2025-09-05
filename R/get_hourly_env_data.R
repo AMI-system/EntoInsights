@@ -75,6 +75,16 @@
 #'
 #' For full parameter definitions and metadata, see the POWER parameter catalogue:
 #' <https://power.larc.nasa.gov/parameters/>.
+#' 
+#' @import dplyr
+#' @import sf
+#' @import elevatr
+#' @import moonlit
+#' @importFrom httr GET content timeout
+#' @importFrom jsonlite fromJSON
+#' @importFrom glue glue_data
+#' @importFrom lubridate with_tz
+#' @importFrom stats na.omit
 #'
 #' @examples
 #' \dontrun{

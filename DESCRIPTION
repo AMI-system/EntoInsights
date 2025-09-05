@@ -30,7 +30,7 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Depends: 
-    R (>= 2.10)
+    R (>= 3.5)
 LazyData: true
 References: National Biodiversity Network (NBN) Record Cleaner. See 
     <https://nbn.org.uk/tools-and-resources/nbn-record-cleaner/>.

@@ -36,7 +36,7 @@ list_deployment_files <- function(bucket,
   credentials_check(credentials_path)
 
   # ----- Validate buckets -----
-  if (length(bucket) == 1) {
+  if (length(bucket) == 1 && length(deployment_id) != 1) {
     message("One bucket provided. Applying to all deployments.")
     bucket <- rep(bucket, length(deployment_id))
   } else if (length(bucket) != length(deployment_id)) {

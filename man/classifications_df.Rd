@@ -3,7 +3,7 @@
 \docType{data}
 \name{classifications_df}
 \alias{classifications_df}
-\title{A subset of data from a survey with the Automated Monitoring of Insects System in the UK}
+\title{A subset of data from a survey with the Automated Monitoring of Insects System in the UK. The dataset contains order and species level classifications}
 \usage{
 classifications_df
 }

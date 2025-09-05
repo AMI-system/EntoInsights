@@ -12,25 +12,15 @@ get_deployment_metadata(api_username, api_password)
 \item{api_password}{Character. API password.}
 }
 \value{
-A tibble with one row per deployment and flattened columns (e.g.
-\code{country}, \code{country_code}, \code{deployment_id}, \code{location_name}, \code{camera_id},
-\code{status}, etc., depending on the API payload).
+A dataframe with one row per deployment and deployment metadata.
 }
 \description{
-Posts credentials to the AMI endpoint and returns the deployment table
-as a flattened tibble. Uses retries and clear error messages.
+Posts credentials to the AMI endpoint and returns the deployment table.
 }
 \examples{
 \dontrun{
-deps <- get_deployment_table("your_user", "your_pass")
+deps <- get_deployment_table("API_username", "API_password")
 
-# 1) Quick check: active deployments per country
-library(dplyr)
-deps \%>\% filter(status == "active") \%>\% count(country, name = "n_active")
-
-# 2) Buckets to use (assuming bucket == tolower(country_code))
-deps \%>\% filter(status == "active") \%>\%
-  transmute(bucket = tolower(country_code), deployment_id)
 }
 
 }
