@@ -356,15 +356,18 @@ display: none;
 <p>This vignette will guide you through: - Cleaning classification
 records using the <strong>record cleaner</strong> function. - Extracting
 date-time information from filenames. - Downloading and processing
-snapshot and audio and ultrasound images. - Listing deployments in the
-object store and their associated metadata - Listing files uploaded to
-deployments - Extracting environmental variables using the NASA power
-API and R packages, moonlit and elevatr</p>
-<p>Note for users: If you are using this guide, it is either because: 1.
-You are using a dataframe of species inferences, and you want to
-download images for a subset of classifications, then derive their crops
-2. You would like to obtain acoustic data for classifications methods of
-your own.</p>
+snapshot images and audio and ultrasound recordings. - Listing
+deployments in the object store and their associated metadata - Listing
+files uploaded to deployments - Extracting environmental variables using
+the NASA power API and R packages, moonlit and elevatr</p>
+<p>Note, if you are using this guide, it is either because:</p>
+<ol style="list-style-type: decimal">
+<li><p>You are using a dataframe of species inferences, and you want to
+download images for a subset of classifications, then derive their
+crops.</p></li>
+<li><p>You would like to obtain acoustic data for classifications
+methods of your own.</p></li>
+</ol>
 <p>If you are in the first situation, please go through the report from
 top to bottom, but skip the section, <strong>Retreiving deployment
 metadata, listing files within deployments, and downloading
@@ -374,12 +377,12 @@ review the code of conduct then skip to the <strong>Retreiving
 deployment metadata, listing files within deployments, and downloading
 files</strong> as the parts inbetween are unlikely to be relevant to
 your work.</p>
-<p><strong>CODE OF CONDUCT</strong> Some functionality in this package
-requires a credentials file, importantly the
-<code>download_object_store_files()</code> function which downloads
-files from deployments. Downloading object store files requires access
-to object store credentials. These credentials give you effective write
-access to the object store. With this in mind:</p>
+<p><strong>CODE OF CONDUCT</strong></p>
+<p>Some functionality in this package requires a credentials file,
+importantly the <code>download_object_store_files()</code> function
+which downloads files from deployments. Downloading object store files
+requires access to object store credentials. These credentials give you
+effective write access to the object store. With this in mind:</p>
 <ol style="list-style-type: decimal">
 <li><strong>You must not extract data from other projects without the
 partners prior permission</strong></li>
@@ -391,15 +394,16 @@ ideas of new features or have a script in mind that you would like to
 use, please consult us for permission first.</li>
 </ol>
 <p>Any breach of this will lead to us invalidating your credentials.</p>
-<p><strong>Disclaimer on downloading data</strong> Please note that
-downloading data, particularly high frequency acoustic files, is really
-time consuming as the files are large and numerous. You will need many
-hours (sometimes days) to retreive all data under a deployment. If you
-want to save time, I’d recommend that you instead download only subsets
-of files, such as files between larger time intervals (e.g., the first
-file captured every hour). Likewise, if the total file size across your
-deployments are larger than your storage capacity, consider designing a
-pipeline that deletes the raw data files after processing them.</p>
+<p><strong>Disclaimer on downloading data</strong></p>
+<p>Please note that downloading data, particularly high frequency
+acoustic files, is really time consuming as the files are large and
+numerous. You will need many hours (sometimes days) to retreive all data
+under a deployment. If you want to save time, I’d recommend that you
+instead download only subsets of files, such as files between larger
+time intervals (e.g., the first file captured every hour). Likewise, if
+the total file size across your deployments are larger than your storage
+capacity, consider designing a pipeline that deletes the raw data files
+after processing them.</p>
 <div id="setup" class="section level3">
 <h3>Setup</h3>
 </div>
@@ -496,99 +500,9 @@ classifications_df_rc_rules = append_RC_rules(classifications_df, latitude, long
 #&gt; Joining with `by = join_by(observation_date, join_species_name)`</code></pre>
 <p>Compare the differences between the original classification dataframe
 and what we have now:</p>
-<pre class="r"><code># Compare what we have added
-str(classifications_df)
-#&gt; &#39;data.frame&#39;:    100 obs. of  44 variables:
-#&gt;  $ image_path         : chr  &quot;data/agzero_2_inferences/20241108162500-snapshot.jpg&quot; &quot;data/agzero_2_inferences/20241108162500-snapshot.jpg&quot; &quot;data/agzero_2_inferences/20241108162600-snapshot.jpg&quot; &quot;data/agzero_2_inferences/20241108162600-snapshot.jpg&quot; ...
-#&gt;  $ image_datetime     : chr  &quot;2024-11-08 16:25:00&quot; &quot;2024-11-08 16:25:00&quot; &quot;2024-11-08 16:26:00&quot; &quot;2024-11-08 16:26:00&quot; ...
-#&gt;  $ bucket_name        : chr  &quot;gbr&quot; &quot;gbr&quot; &quot;gbr&quot; &quot;gbr&quot; ...
-#&gt;  $ deployment_name    : chr  &quot;Gloucester_cullabine&quot; &quot;Gloucester_cullabine&quot; &quot;Gloucester_cullabine&quot; &quot;Gloucester_cullabine&quot; ...
-#&gt;  $ deployment_id      : chr  &quot;dep000066&quot; &quot;dep000066&quot; &quot;dep000066&quot; &quot;dep000066&quot; ...
-#&gt;  $ latitude           : num  52 52 52 52 52 ...
-#&gt;  $ longitude          : num  -1.97 -1.97 -1.97 -1.97 -1.97 ...
-#&gt;  $ analysis_datetime  : chr  &quot;2025-08-08 13:27:44&quot; &quot;2025-08-08 13:27:44&quot; &quot;2025-08-08 13:27:46&quot; &quot;2025-08-08 13:27:46&quot; ...
-#&gt;  $ recording_session  : chr  &quot;2024-11-08&quot; &quot;2024-11-08&quot; &quot;2024-11-08&quot; &quot;2024-11-08&quot; ...
-#&gt;  $ image_bluriness    : num  32.3 32.3 33 33 32.5 ...
-#&gt;  $ crop_status        : chr  &quot;crop_1&quot; &quot;crop_2&quot; &quot;crop_1&quot; &quot;crop_2&quot; ...
-#&gt;  $ crop_bluriness     : num  15.8 34.8 15.4 33.5 32.3 ...
-#&gt;  $ crop_area          : int  67680 7630 68320 7848 7770 68000 68800 8140 68320 7630 ...
-#&gt;  $ cropped_image_path : logi  NA NA NA NA NA NA ...
-#&gt;  $ box_score          : num  0.732 0.643 0.723 0.689 0.72 ...
-#&gt;  $ box_label          : int  1 1 1 1 1 1 1 1 1 1 ...
-#&gt;  $ x_min              : int  2236 291 2236 291 292 2236 2236 290 2236 291 ...
-#&gt;  $ y_min              : int  999 444 997 444 444 999 994 444 997 445 ...
-#&gt;  $ x_max              : int  2396 361 2396 363 362 2396 2396 364 2396 361 ...
-#&gt;  $ y_max              : int  1422 553 1424 553 555 1424 1424 554 1424 554 ...
-#&gt;  $ class_name         : chr  &quot;nonmoth&quot; &quot;moth&quot; &quot;nonmoth&quot; &quot;moth&quot; ...
-#&gt;  $ class_confidence   : num  0.938 0.93 0.82 0.905 0.808 ...
-#&gt;  $ order_name         : chr  &quot;Lepidoptera Micros&quot; &quot;Lepidoptera Micros&quot; &quot;Lepidoptera Micros&quot; &quot;Lepidoptera Micros&quot; ...
-#&gt;  $ order_confidence   : num  0.608 0.567 0.52 0.646 0.597 ...
-#&gt;  $ top_1_species      : chr  &quot;Taleporia tubulosa&quot; &quot;Vitula edmandsii&quot; &quot;Plodia interpunctella&quot; &quot;Vitula edmandsii&quot; ...
-#&gt;  $ top_2_species      : chr  &quot;Aphomia sociella&quot; &quot;Ephestia kuehniella&quot; &quot;Aphomia sociella&quot; &quot;Ephestia kuehniella&quot; ...
-#&gt;  $ top_3_species      : chr  &quot;Plodia interpunctella&quot; &quot;Dichomeris marginella&quot; &quot;Taleporia tubulosa&quot; &quot;Spilonota ocellana&quot; ...
-#&gt;  $ top_4_species      : chr  &quot;Tachystola acroxantha&quot; &quot;Spilonota ocellana&quot; &quot;Carcina quercana&quot; &quot;Dichomeris marginella&quot; ...
-#&gt;  $ top_5_species      : chr  &quot;Carcina quercana&quot; &quot;Caloptilia stigmatella&quot; &quot;Tachystola acroxantha&quot; &quot;Notocelia rosaecolana&quot; ...
-#&gt;  $ top_1_confidence   : num  0.456 0.121 0.348 0.147 0.135 ...
-#&gt;  $ top_2_confidence   : num  0.2786 0.0901 0.2094 0.1168 0.1344 ...
-#&gt;  $ top_3_confidence   : num  0.156 0.0714 0.1459 0.0918 0.0892 ...
-#&gt;  $ top_4_confidence   : num  0.00741 0.07056 0.04815 0.06322 0.05901 ...
-#&gt;  $ top_5_confidence   : num  0.00673 0.0298 0.03145 0.04742 0.04663 ...
-#&gt;  $ previous_image     : chr  &quot;&quot; &quot;&quot; &quot;20241108162500-snapshot.jpg&quot; &quot;20241108162500-snapshot.jpg&quot; ...
-#&gt;  $ best_match_crop    : chr  &quot;No species crops from previous image. Tracking not possible.&quot; &quot;No species crops from previous image. Tracking not possible.&quot; &quot;crop_1&quot; &quot;crop_2&quot; ...
-#&gt;  $ cnn_cost           : num  NA NA 0.0304 0.0707 0.0443 ...
-#&gt;  $ iou_cost           : num  NA NA 0.01 0.03 0.04 0 0.01 0.06 0.01 0.06 ...
-#&gt;  $ box_ratio_cost     : num  NA NA 0.00935 0.0274 0.00971 ...
-#&gt;  $ dist_ratio_cost    : num  NA NA 0 0.000216 0.000216 ...
-#&gt;  $ total_cost         : num  NA NA 0.0498 0.1283 0.0942 ...
-#&gt;  $ image_path_basename: chr  &quot;20241108162500-snapshot.jpg&quot; &quot;20241108162500-snapshot.jpg&quot; &quot;20241108162600-snapshot.jpg&quot; &quot;20241108162600-snapshot.jpg&quot; ...
-#&gt;  $ crop_id            : chr  &quot;crop_1&quot; &quot;crop_2&quot; &quot;crop_1&quot; &quot;crop_2&quot; ...
-#&gt;  $ track_id           : chr  &quot;Track_00004&quot; &quot;Track_00005&quot; &quot;Track_00004&quot; &quot;Track_00005&quot; ...
-str(classifications_df_rc_rules)
-#&gt; &#39;data.frame&#39;:    100 obs. of  59 variables:
-#&gt;  $ image_path                             : chr  &quot;data/agzero_2_inferences/20241108162500-snapshot.jpg&quot; &quot;data/agzero_2_inferences/20241108162500-snapshot.jpg&quot; &quot;data/agzero_2_inferences/20241108162600-snapshot.jpg&quot; &quot;data/agzero_2_inferences/20241108162600-snapshot.jpg&quot; ...
-#&gt;  $ image_datetime                         : chr  &quot;2024-11-08 16:25:00&quot; &quot;2024-11-08 16:25:00&quot; &quot;2024-11-08 16:26:00&quot; &quot;2024-11-08 16:26:00&quot; ...
-#&gt;  $ bucket_name                            : chr  &quot;gbr&quot; &quot;gbr&quot; &quot;gbr&quot; &quot;gbr&quot; ...
-#&gt;  $ deployment_name                        : chr  &quot;Gloucester_cullabine&quot; &quot;Gloucester_cullabine&quot; &quot;Gloucester_cullabine&quot; &quot;Gloucester_cullabine&quot; ...
-#&gt;  $ deployment_id                          : chr  &quot;dep000066&quot; &quot;dep000066&quot; &quot;dep000066&quot; &quot;dep000066&quot; ...
-#&gt;  $ latitude                               : num  52 52 52 52 52 ...
-#&gt;  $ longitude                              : num  -1.97 -1.97 -1.97 -1.97 -1.97 ...
-#&gt;  $ analysis_datetime                      : chr  &quot;2025-08-08 13:27:44&quot; &quot;2025-08-08 13:27:44&quot; &quot;2025-08-08 13:27:46&quot; &quot;2025-08-08 13:27:46&quot; ...
-#&gt;  $ recording_session                      : chr  &quot;2024-11-08&quot; &quot;2024-11-08&quot; &quot;2024-11-08&quot; &quot;2024-11-08&quot; ...
-#&gt;  $ image_bluriness                        : num  32.3 32.3 33 33 32.5 ...
-#&gt;  $ crop_status                            : chr  &quot;crop_1&quot; &quot;crop_2&quot; &quot;crop_1&quot; &quot;crop_2&quot; ...
-#&gt;  $ crop_bluriness                         : num  15.8 34.8 15.4 33.5 32.3 ...
-#&gt;  $ crop_area                              : int  67680 7630 68320 7848 7770 68000 68800 8140 68320 7630 ...
-#&gt;  $ cropped_image_path                     : logi  NA NA NA NA NA NA ...
-#&gt;  $ box_score                              : num  0.732 0.643 0.723 0.689 0.72 ...
-#&gt;  $ box_label                              : int  1 1 1 1 1 1 1 1 1 1 ...
-#&gt;  $ x_min                                  : int  2236 291 2236 291 292 2236 2236 290 2236 291 ...
-#&gt;  $ y_min                                  : int  999 444 997 444 444 999 994 444 997 445 ...
-#&gt;  $ x_max                                  : int  2396 361 2396 363 362 2396 2396 364 2396 361 ...
-#&gt;  $ y_max                                  : int  1422 553 1424 553 555 1424 1424 554 1424 554 ...
-#&gt;  $ class_name                             : chr  &quot;nonmoth&quot; &quot;moth&quot; &quot;nonmoth&quot; &quot;moth&quot; ...
-#&gt;  $ class_confidence                       : num  0.938 0.93 0.82 0.905 0.808 ...
-#&gt;  $ order_name                             : chr  &quot;Lepidoptera Micros&quot; &quot;Lepidoptera Micros&quot; &quot;Lepidoptera Micros&quot; &quot;Lepidoptera Micros&quot; ...
-#&gt;  $ order_confidence                       : num  0.608 0.567 0.52 0.646 0.597 ...
-#&gt;  $ top_1_species                          : chr  &quot;Taleporia tubulosa&quot; &quot;Vitula edmandsii&quot; &quot;Plodia interpunctella&quot; &quot;Vitula edmandsii&quot; ...
-#&gt;  $ top_2_species                          : chr  &quot;Aphomia sociella&quot; &quot;Ephestia kuehniella&quot; &quot;Aphomia sociella&quot; &quot;Ephestia kuehniella&quot; ...
-#&gt;  $ top_3_species                          : chr  &quot;Plodia interpunctella&quot; &quot;Dichomeris marginella&quot; &quot;Taleporia tubulosa&quot; &quot;Spilonota ocellana&quot; ...
-#&gt;  $ top_4_species                          : chr  &quot;Tachystola acroxantha&quot; &quot;Spilonota ocellana&quot; &quot;Carcina quercana&quot; &quot;Dichomeris marginella&quot; ...
-#&gt;  $ top_5_species                          : chr  &quot;Carcina quercana&quot; &quot;Caloptilia stigmatella&quot; &quot;Tachystola acroxantha&quot; &quot;Notocelia rosaecolana&quot; ...
-#&gt;  $ top_1_confidence                       : num  0.456 0.121 0.348 0.147 0.135 ...
-#&gt;  $ top_2_confidence                       : num  0.2786 0.0901 0.2094 0.1168 0.1344 ...
-#&gt;  $ top_3_confidence                       : num  0.156 0.0714 0.1459 0.0918 0.0892 ...
-#&gt;  $ top_4_confidence                       : num  0.00741 0.07056 0.04815 0.06322 0.05901 ...
-#&gt;  $ top_5_confidence                       : num  0.00673 0.0298 0.03145 0.04742 0.04663 ...
-#&gt;  $ previous_image                         : chr  &quot;&quot; &quot;&quot; &quot;20241108162500-snapshot.jpg&quot; &quot;20241108162500-snapshot.jpg&quot; ...
-#&gt;  $ best_match_crop                        : chr  &quot;No species crops from previous image. Tracking not possible.&quot; &quot;No species crops from previous image. Tracking not possible.&quot; &quot;crop_1&quot; &quot;crop_2&quot; ...
-#&gt;  $ cnn_cost                               : num  NA NA 0.0304 0.0707 0.0443 ...
-#&gt;  $ iou_cost                               : num  NA NA 0.01 0.03 0.04 0 0.01 0.06 0.01 0.06 ...
-#&gt;  $ box_ratio_cost                         : num  NA NA 0.00935 0.0274 0.00971 ...
-#&gt;  $ dist_ratio_cost                        : num  NA NA 0 0.000216 0.000216 ...
-#&gt;  $ total_cost                             : num  NA NA 0.0498 0.1283 0.0942 ...
-#&gt;  $ image_path_basename                    : chr  &quot;20241108162500-snapshot.jpg&quot; &quot;20241108162500-snapshot.jpg&quot; &quot;20241108162600-snapshot.jpg&quot; &quot;20241108162600-snapshot.jpg&quot; ...
-#&gt;  $ crop_id                                : chr  &quot;crop_1&quot; &quot;crop_2&quot; &quot;crop_1&quot; &quot;crop_2&quot; ...
-#&gt;  $ track_id                               : chr  &quot;Track_00004&quot; &quot;Track_00005&quot; &quot;Track_00004&quot; &quot;Track_00005&quot; ...
+<pre class="r"><code># Look at what we have added
+str(classifications_df_rc_rules[setdiff(colnames(classifications_df_rc_rules), colnames(classifications_df))])
+#&gt; &#39;data.frame&#39;:    100 obs. of  15 variables:
 #&gt;  $ top_1_species_identification_difficulty: int  1 NA 1 NA 3 1 1 1 1 NA ...
 #&gt;  $ top_1_species_presence                 : num  NA NA NA NA NA NA NA NA NA NA ...
 #&gt;  $ top_1_species_within_date              : num  0 0 1 0 1 0 0 0 0 0 ...
@@ -606,10 +520,13 @@ str(classifications_df_rc_rules)
 #&gt;  $ top_5_species_within_date              : num  1 1 1 0 0 1 0 0 1 0 ...</code></pre>
 <p>As you can see, append_RC_rules, has inserted the following column,
 with x corresponding to the ranked identification class of the species
-(In our example dataset, there are 5 top predictions). The columns are:
-1. <strong>top_x_species_identification_difficulty</strong>: A number,
+(In our example dataset, there are 5 top predictions). The columns
+are:</p>
+<ol style="list-style-type: decimal">
+<li><strong>top_x_species_identification_difficulty</strong>: A number,
 from 1 - 4, indicating the degree to which the species is difficult to
-identify. Please see the key below:</p>
+identify. Please see the key below:</li>
+</ol>
 <table>
 <colgroup>
 <col width="1%" />
@@ -662,11 +579,12 @@ specimen should be retained for confirmation.</td>
 </tr>
 </tbody>
 </table>
-<ol style="list-style-type: decimal">
-<li><strong>top_x_species_presence</strong>: Whether the species is
-present, with respect to its known activity.</li>
-<li><strong>top_x_species_within_date</strong>: Whether the species is
-active at the given date, with respect to its known phenology.</li>
+<ol start="2" style="list-style-type: decimal">
+<li><p><strong>top_x_species_presence</strong>: Whether the species is
+present, with respect to its known activity.</p></li>
+<li><p><strong>top_x_species_within_date</strong>: Whether the species
+is active at the given date, with respect to its known
+phenology.</p></li>
 </ol>
 <p>You can use the results of the record cleaner to subset depending on
 your research needs. For example, we could subset out species that are
@@ -703,149 +621,14 @@ datetimes in the filenames, and the function,
 use this function, simply run the following chunk. It will provide
 warnings for the number of rows that fail to parse the datetime.</p>
 <pre class="r"><code># Extract the time of recording
-classifications_df_rc_rules %&gt;%
-mutate(capture_datetime = as.POSIXct(parse_AMI_datetimes(basename(image_path)), origin = &quot;1970-01-01&quot;, tz = &quot;UTC&quot;)) %&gt;%
-head()
-#&gt;                                             image_path      image_datetime
-#&gt; 1 data/agzero_2_inferences/20241108162500-snapshot.jpg 2024-11-08 16:25:00
-#&gt; 2 data/agzero_2_inferences/20241108162600-snapshot.jpg 2024-11-08 16:26:00
-#&gt; 3 data/agzero_2_inferences/20241108162700-snapshot.jpg 2024-11-08 16:27:00
-#&gt; 4 data/agzero_2_inferences/20241108162800-snapshot.jpg 2024-11-08 16:28:00
-#&gt; 5 data/agzero_2_inferences/20241108162800-snapshot.jpg 2024-11-08 16:28:00
-#&gt; 6 data/agzero_2_inferences/20241108162900-snapshot.jpg 2024-11-08 16:29:00
-#&gt;   bucket_name      deployment_name deployment_id latitude longitude
-#&gt; 1         gbr Gloucester_cullabine     dep000066   52.028 -1.967493
-#&gt; 2         gbr Gloucester_cullabine     dep000066   52.028 -1.967493
-#&gt; 3         gbr Gloucester_cullabine     dep000066   52.028 -1.967493
-#&gt; 4         gbr Gloucester_cullabine     dep000066   52.028 -1.967493
-#&gt; 5         gbr Gloucester_cullabine     dep000066   52.028 -1.967493
-#&gt; 6         gbr Gloucester_cullabine     dep000066   52.028 -1.967493
-#&gt;     analysis_datetime recording_session image_bluriness crop_status
-#&gt; 1 2025-08-08 13:27:44        2024-11-08        32.30194      crop_1
-#&gt; 2 2025-08-08 13:27:46        2024-11-08        32.99864      crop_1
-#&gt; 3 2025-08-08 13:27:47        2024-11-08        32.48894      crop_2
-#&gt; 4 2025-08-08 13:27:47        2024-11-08        33.34478      crop_1
-#&gt; 5 2025-08-08 13:27:47        2024-11-08        33.34478      crop_2
-#&gt; 6 2025-08-08 13:27:48        2024-11-08        33.02354      crop_1
-#&gt;   crop_bluriness crop_area cropped_image_path box_score box_label x_min y_min
-#&gt; 1       15.78683     67680                 NA 0.7324219         1  2236   999
-#&gt; 2       15.37747     68320                 NA 0.7231445         1  2236   997
-#&gt; 3       15.23325     68000                 NA 0.6806641         1  2236   999
-#&gt; 4       16.27701     68800                 NA 0.7216797         1  2236   994
-#&gt; 5       32.36695      8140                 NA 0.7026367         1   290   444
-#&gt; 6       16.36881     68320                 NA 0.7075195         1  2236   997
-#&gt;   x_max y_max class_name class_confidence         order_name order_confidence
-#&gt; 1  2396  1422    nonmoth        0.9384359 Lepidoptera Micros        0.6083047
-#&gt; 2  2396  1424    nonmoth        0.8204765 Lepidoptera Micros        0.5197279
-#&gt; 3  2396  1424    nonmoth        0.9422041 Lepidoptera Micros        0.5124158
-#&gt; 4  2396  1424    nonmoth        0.9357963 Lepidoptera Micros        0.5341282
-#&gt; 5   364   554       moth        0.9020469 Lepidoptera Micros        0.6098394
-#&gt; 6  2396  1424    nonmoth        0.9229640 Lepidoptera Micros        0.5326155
-#&gt;           top_1_species         top_2_species         top_3_species
-#&gt; 1    Taleporia tubulosa      Aphomia sociella Plodia interpunctella
-#&gt; 2 Plodia interpunctella      Aphomia sociella    Taleporia tubulosa
-#&gt; 3      Aphomia sociella Plodia interpunctella    Taleporia tubulosa
-#&gt; 4      Aphomia sociella    Taleporia tubulosa Plodia interpunctella
-#&gt; 5 Dichomeris marginella   Ephestia kuehniella            Pyla fusca
-#&gt; 6      Aphomia sociella Plodia interpunctella    Taleporia tubulosa
-#&gt;              top_4_species           top_5_species top_1_confidence
-#&gt; 1    Tachystola acroxantha        Carcina quercana        0.4563326
-#&gt; 2         Carcina quercana   Tachystola acroxantha        0.3483601
-#&gt; 3    Tachystola acroxantha        Carcina quercana        0.5305041
-#&gt; 4         Carcina quercana Agonopterix angelicella        0.3605658
-#&gt; 5         Vitula edmandsii      Spilonota ocellana        0.1818301
-#&gt; 6 Trichiocercus sparshalli        Carcina quercana        0.2182676
-#&gt;   top_2_confidence top_3_confidence top_4_confidence top_5_confidence
-#&gt; 1        0.2785823       0.15602377      0.007413948      0.006729138
-#&gt; 2        0.2093729       0.14587021      0.048152090      0.031445180
-#&gt; 3        0.2490483       0.06465488      0.012216525      0.010189462
-#&gt; 4        0.2006105       0.18006338      0.014798769      0.014449050
-#&gt; 5        0.1628498       0.11823147      0.106696250      0.065543674
-#&gt; 6        0.2099958       0.08699715      0.042355016      0.035499606
-#&gt;                previous_image
-#&gt; 1                            
-#&gt; 2 20241108162500-snapshot.jpg
-#&gt; 3 20241108162600-snapshot.jpg
-#&gt; 4 20241108162700-snapshot.jpg
-#&gt; 5 20241108162700-snapshot.jpg
-#&gt; 6 20241108162800-snapshot.jpg
-#&gt;                                                best_match_crop   cnn_cost
-#&gt; 1 No species crops from previous image. Tracking not possible.         NA
-#&gt; 2                                                       crop_1 0.03042698
-#&gt; 3                                                       crop_1 0.02708972
-#&gt; 4                                                       crop_2 0.04730188
-#&gt; 5                                                       crop_1 0.02875214
-#&gt; 6                                                       crop_1 0.01994450
-#&gt;   iou_cost box_ratio_cost dist_ratio_cost total_cost
-#&gt; 1       NA             NA              NA         NA
-#&gt; 2     0.01    0.009345794    0.0000000000 0.04977278
-#&gt; 3     0.00    0.004672897    0.0002159529 0.03197857
-#&gt; 4     0.01    0.011600928    0.0005398823 0.06944269
-#&gt; 5     0.06    0.044804805    0.0001079765 0.13366492
-#&gt; 6     0.01    0.006960557    0.0003239294 0.03722898
-#&gt;           image_path_basename crop_id    track_id
-#&gt; 1 20241108162500-snapshot.jpg  crop_1 Track_00004
-#&gt; 2 20241108162600-snapshot.jpg  crop_1 Track_00004
-#&gt; 3 20241108162700-snapshot.jpg  crop_2 Track_00004
-#&gt; 4 20241108162800-snapshot.jpg  crop_1 Track_00004
-#&gt; 5 20241108162800-snapshot.jpg  crop_2 Track_00005
-#&gt; 6 20241108162900-snapshot.jpg  crop_1 Track_00004
-#&gt;   top_1_species_identification_difficulty top_1_species_presence
-#&gt; 1                                       1                     NA
-#&gt; 2                                       1                     NA
-#&gt; 3                                       1                     NA
-#&gt; 4                                       1                     NA
-#&gt; 5                                       1                     NA
-#&gt; 6                                       1                     NA
-#&gt;   top_1_species_within_date top_2_species_identification_difficulty
-#&gt; 1                         0                                       1
-#&gt; 2                         1                                       1
-#&gt; 3                         0                                       1
-#&gt; 4                         0                                       1
-#&gt; 5                         0                                       3
-#&gt; 6                         0                                       1
-#&gt;   top_2_species_presence top_2_species_within_date
-#&gt; 1                     NA                         0
-#&gt; 2                     NA                         0
-#&gt; 3                     NA                         1
-#&gt; 4                     NA                         0
-#&gt; 5                     NA                         1
-#&gt; 6                     NA                         1
-#&gt;   top_3_species_identification_difficulty top_3_species_presence
-#&gt; 1                                       1                     NA
-#&gt; 2                                       1                     NA
-#&gt; 3                                       1                     NA
-#&gt; 4                                       1                     NA
-#&gt; 5                                      NA                     NA
-#&gt; 6                                       1                     NA
-#&gt;   top_3_species_within_date top_4_species_identification_difficulty
-#&gt; 1                         1                                       1
-#&gt; 2                         0                                       1
-#&gt; 3                         0                                       1
-#&gt; 4                         1                                       1
-#&gt; 5                        NA                                      NA
-#&gt; 6                         0                                      NA
-#&gt;   top_4_species_presence top_4_species_within_date
-#&gt; 1                     NA                         1
-#&gt; 2                     NA                         1
-#&gt; 3                     NA                         1
-#&gt; 4                     NA                         1
-#&gt; 5                     NA                         0
-#&gt; 6                     NA                        NA
-#&gt;   top_5_species_identification_difficulty top_5_species_presence
-#&gt; 1                                       1                     NA
-#&gt; 2                                       1                     NA
-#&gt; 3                                       1                     NA
-#&gt; 4                                       2                     NA
-#&gt; 5                                       1                     NA
-#&gt; 6                                       1                     NA
-#&gt;   top_5_species_within_date    capture_datetime
-#&gt; 1                         1 2024-11-08 16:25:00
-#&gt; 2                         1 2024-11-08 16:26:00
-#&gt; 3                         1 2024-11-08 16:27:00
-#&gt; 4                         0 2024-11-08 16:28:00
-#&gt; 5                         0 2024-11-08 16:28:00
-#&gt; 6                         1 2024-11-08 16:29:00</code></pre>
+classifications_df_rc_rules = classifications_df_rc_rules %&gt;%
+mutate(capture_datetime = as.POSIXct(parse_AMI_datetimes(basename(image_path)), origin = &quot;1970-01-01&quot;, tz = &quot;UTC&quot;))
+
+# View first 5 values
+classifications_df_rc_rules$capture_datetime[1:5]
+#&gt; [1] &quot;2024-11-08 16:25:00 UTC&quot; &quot;2024-11-08 16:26:00 UTC&quot;
+#&gt; [3] &quot;2024-11-08 16:27:00 UTC&quot; &quot;2024-11-08 16:28:00 UTC&quot;
+#&gt; [5] &quot;2024-11-08 16:28:00 UTC&quot;</code></pre>
 </div>
 <div id="downloading-snapshots" class="section level3">
 <h3>Downloading snapshots</h3>
@@ -865,28 +648,32 @@ download.</p>
 <pre class="r"><code>classifications_subset = classifications_df_rc_rules %&gt;% slice_sample(n = 10)</code></pre>
 <p>To download snapshots, please use the
 <code>download_object_store_files</code> function. As input, you will
-need to provide: 1. The bucket name (bucket): In most instances this is
-the ISO-3 code of the country, in lower case, e.g., <code>gbr</code>.
-The exeption is the saltmarsh soundscapes project which is
-<code>saltmarsh-soundscapes</code>. 2. The deployment ID
-(deployment_id): The ID associated with the deployment. If you are
-uncertain of this, see the image_path of your classifications. The ID
-should be in the path. For example, <code>dep000072</code> in
+need to provide:</p>
+<ol style="list-style-type: decimal">
+<li><p>The bucket name (bucket): In most instances this is the ISO-3
+code of the country, in lower case, e.g., <code>gbr</code>. The exeption
+is the saltmarsh soundscapes project which is
+<code>saltmarsh-soundscapes</code>.</p></li>
+<li><p>The deployment ID (deployment_id): The ID associated with the
+deployment. If you are uncertain of this, see the image_path of your
+classifications. The ID should be in the path. For example,
+<code>dep000072</code> in
 <code>./data/solar/gbr/dep000072/20240618024000-snapshot.jpg</code>.
 This is either a single value or a vector of values, one for each file
-(if you want to download files across multiple deployments). 3. The data
-type (data_type): The type of data, being either
+(if you want to download files across multiple deployments).</p></li>
+<li><p>The data type (data_type): The type of data, being either
 <code>snapshot_images</code>, <code>motion_images</code> (in the case of
 older surveys before early 2024), <code>ultrasound_recordings</code>, or
 <code>audible_recordings</code>. For the Saltmarsh Soundscapes project
 it will be <code>terrestrial_recordings</code> or
 <code>aquatic_recordings</code>, This is either a single value or a
 vector of values, one for each file (if you want to download multiple
-file types). 4. The filenames of desired files (filename): This is the
-basename of the files. This will always be called
-<code>image_path</code> inside the classifications tables. To obtain the
-basename without all the subfolders, please use the
-<code>basename()</code> function.</p>
+file types).</p></li>
+<li><p>The filenames of desired files (filename): This is the basename
+of the files. This will always be called <code>image_path</code> inside
+the classifications tables. To obtain the basename without all the
+subfolders, please use the <code>basename()</code> function.</p></li>
+</ol>
 <pre class="r"><code># Parameters for download
 bucket = classifications_subset$bucket_name
 deployment_id = classifications_subset$deployment_id
@@ -905,13 +692,8 @@ snapshot_download_log &lt;- download_object_store_files(
 #&gt; not share your credentials with others, and do not use it for functions outside
 #&gt; of the EntoInsights package unless you are certain it will not delete any
 #&gt; files.
+#&gt; Created download path: ./downloads
 #&gt; Processing bucket: gbr
-#&gt; File already downloaded, skipping: dep000066/snapshot_images/20241108165100-snapshot.jpg
-#&gt; File already downloaded, skipping: dep000066/snapshot_images/20241108163400-snapshot.jpg
-#&gt; File already downloaded, skipping: dep000066/snapshot_images/20241108170000-snapshot.jpg
-#&gt; File already downloaded, skipping: dep000066/snapshot_images/20241108165200-snapshot.jpg
-#&gt; File already downloaded, skipping: dep000066/snapshot_images/20241108164000-snapshot.jpg
-#&gt; File already downloaded, skipping: dep000066/snapshot_images/20241108170600-snapshot.jpg
 #&gt; Download log saved as &#39;files_downloaded_log.csv&#39;
 
 head(snapshot_download_log)
@@ -923,39 +705,42 @@ head(snapshot_download_log)
 #&gt; 5    gbr     dep000066 snapshot_images
 #&gt; 6    gbr     dep000066 snapshot_images
 #&gt;                                                          local_path
-#&gt; 1 ./downloads/dep000066/snapshot_images/20241108165100-snapshot.jpg
-#&gt; 2 ./downloads/dep000066/snapshot_images/20241108171100-snapshot.jpg
-#&gt; 3 ./downloads/dep000066/snapshot_images/20241108163400-snapshot.jpg
-#&gt; 4 ./downloads/dep000066/snapshot_images/20241108170000-snapshot.jpg
-#&gt; 5 ./downloads/dep000066/snapshot_images/20241108165200-snapshot.jpg
-#&gt; 6 ./downloads/dep000066/snapshot_images/20241108164000-snapshot.jpg
-#&gt;                download_status
-#&gt; 1 already downloaded (skipped)
-#&gt; 2      successfully downloaded
-#&gt; 3 already downloaded (skipped)
-#&gt; 4 already downloaded (skipped)
-#&gt; 5 already downloaded (skipped)
-#&gt; 6 already downloaded (skipped)</code></pre>
+#&gt; 1 ./downloads/dep000066/snapshot_images/20241108163100-snapshot.jpg
+#&gt; 2 ./downloads/dep000066/snapshot_images/20241108164500-snapshot.jpg
+#&gt; 3 ./downloads/dep000066/snapshot_images/20241108163500-snapshot.jpg
+#&gt; 4 ./downloads/dep000066/snapshot_images/20241108165800-snapshot.jpg
+#&gt; 5 ./downloads/dep000066/snapshot_images/20241108163900-snapshot.jpg
+#&gt; 6 ./downloads/dep000066/snapshot_images/20241108163400-snapshot.jpg
+#&gt;           download_status
+#&gt; 1 successfully downloaded
+#&gt; 2 successfully downloaded
+#&gt; 3 successfully downloaded
+#&gt; 4 successfully downloaded
+#&gt; 5 successfully downloaded
+#&gt; 6 successfully downloaded</code></pre>
 <p>As raised in the warning message, <strong>please use your credentials
 carefully</strong>, as they give you write access to the contents of the
 object store. If you have not already please review the code of conduct
 at the start of this document.</p>
-<p>You will have received the following outputs from this process: 1.
-Snapshots in a <code>downloads</code> directory: The snapshots are
-sorted into subfolders named after the deployment ID and data type. If
-you have downloaded files from multiple deployments please be careful
+<p>You will have received the following outputs from this process:</p>
+<ol style="list-style-type: decimal">
+<li><p>Snapshots in a <code>downloads</code> directory: The snapshots
+are sorted into subfolders named after the deployment ID and data type.
+If you have downloaded files from multiple deployments please be careful
 about moving files between subfolders inside the downloads directory, as
-this will confuse subsequent download and cropping processes. 2.
-files_downloaded_log.csv: This logs your deployment IDs, data types, and
-the local installation path and download status. The download status is
-either <code>successfully downloaded</code>, meaning the file has been
-downloaded to the download directory,
+this will confuse subsequent download and cropping processes.</p></li>
+<li><p>files_downloaded_log.csv: This logs your deployment IDs, data
+types, and the local installation path and download status. The download
+status is either <code>successfully downloaded</code>, meaning the file
+has been downloaded to the download directory,
 <code>already downloaded (skipped)</code> meaning the file already
 exists in the download directory, or
 <code>failed download (see warnings)</code>, meaning that there was an
 error that interrupted the download process. In the event that a
 download failed, the error message should print as a warning. If you
-cannot see this, please use the warnings() command to recover it.</p>
+cannot see this, please use the warnings() command to recover
+it.</p></li>
+</ol>
 </div>
 <div id="obtaining-crops-from-downloaded-snapshots" class="section level3">
 <h3>Obtaining crops from downloaded snapshots</h3>
@@ -980,9 +765,7 @@ and is generated inside the function unless you create a
 classification_id column of your own with your own assigned values.</p>
 <pre class="r"><code>crop_and_save_images(classifications_df = classifications_df_rc_rules, classifications_column = &quot;order_name&quot;)
 #&gt; The classification id column is missing. Setting classification ID as the row number
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_4.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_5.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_macros/lepidoptera_macros_7.jpg
+#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_3.jpg
 #&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_8.jpg
 #&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_9.jpg
 #&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_12.jpg
@@ -990,34 +773,14 @@ classification_id column of your own with your own assigned values.</p>
 #&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_14.jpg
 #&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_15.jpg
 #&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_16.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_18.jpg
 #&gt; Cropped and saved: ./crops/lepidoptera_macros/lepidoptera_macros_21.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_22.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_24.jpg
+#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_26.jpg
 #&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_27.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_29.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_30.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_34.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_35.jpg
 #&gt; Cropped and saved: ./crops/lepidoptera_macros/lepidoptera_macros_36.jpg
 #&gt; Cropped and saved: ./crops/diptera_nematocera/diptera_nematocera_37.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_43.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_macros/lepidoptera_macros_44.jpg
+#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_41.jpg
+#&gt; Cropped and saved: ./crops/lepidoptera_macros/lepidoptera_macros_42.jpg
 #&gt; Cropped and saved: ./crops/lepidoptera_macros/lepidoptera_macros_45.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_macros/lepidoptera_macros_48.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_49.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_50.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_51.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_54.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_55.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_56.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_57.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_58.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_59.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_60.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_61.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_62.jpg
-#&gt; Cropped and saved: ./crops/lepidoptera_micros/lepidoptera_micros_63.jpg
 #&gt; classifications and crops pairings saved as &#39;classifications_crops_pairings.csv&#39;</code></pre>
 <p>Note that the <code>crop_and_save_images</code> function by default
 saves the classifications dataframe, including the classification_id
@@ -1028,12 +791,12 @@ column, as <code>classifications_crops_pairings.csv</code>.</p>
 and downloading files</h3>
 <p>The following section will allow you to:</p>
 <ol style="list-style-type: decimal">
-<li>Inspect deployment metadata for your analysis including deployment
-names, locations and IDs associated with the monitoring system and
-hardware components.</li>
-<li>List files within buckets and their deployments.</li>
-<li>Download files from the object store based on an extracted list of
-files.</li>
+<li><p>Inspect deployment metadata for your analysis including
+deployment names, locations and IDs associated with the monitoring
+system and hardware components.</p></li>
+<li><p>List files within buckets and their deployments.</p></li>
+<li><p>Download files from the object store based on an extracted list
+of files.</p></li>
 </ol>
 <p>This section will be most relevant to users conducting their own
 acoustic analysis, who do not have a classifications dataframe listing
@@ -1078,27 +841,27 @@ dep000061_metadata = deployments_metadata[which(deployments_metadata$deployment_
 associated with each AMI deployment for which we have metadata inside
 the object store. Most relevant to users analysis is:</p>
 <ol style="list-style-type: decimal">
-<li>The bucket name (bucket): In most instances this is the ISO-3 code
-of the country, in lower case, e.g., <code>gbr</code>. The exeption is
-the saltmarsh soundscapes project which is
-<code>saltmarsh-soundscapes</code>.</li>
-<li>The deployment ID (deployment_id): The ID associated with the
+<li><p>The bucket name (bucket): In most instances this is the ISO-3
+code of the country, in lower case, e.g., <code>gbr</code>. The exeption
+is the saltmarsh soundscapes project which is
+<code>saltmarsh-soundscapes</code>.</p></li>
+<li><p>The deployment ID (deployment_id): The ID associated with the
 deployment. Please note that some regions such as Panama will have
 multiple years of surveys. This is either a single value or a vector of
 values, one for each file (if you want to download files across multiple
 deployments). Please be careful and make sure you are referencing the
 correct deployment by reviewing the latitude and longitude information
-carefully.</li>
-<li>The data type (data_type): The type of data, being either
+carefully.</p></li>
+<li><p>The data type (data_type): The type of data, being either
 <code>snapshot_images</code>, <code>motion_images</code> (in the case of
 older surveys before early 2024), <code>ultrasound_recordings</code>, or
 <code>audible_recordings</code>. For the Saltmarsh Soundscapes project
 it will be <code>terrestrial_recordings</code> or
 <code>aquatic_recordings</code>, This is either a single value or a
 vector of values, one for each file (if you want to download multiple
-file types).</li>
-<li>latitude/longitude: The deployment position registered for the
-deployment.</li>
+file types).</p></li>
+<li><p>latitude/longitude: The deployment position registered for the
+deployment.</p></li>
 </ol>
 <p><strong>Important</strong> Please be careful about sharing this
 metadata, and the locations of active deployments need to be kept
@@ -1161,19 +924,19 @@ dep000061_snapshot_ultrasound_files_download_log &lt;- download_object_store_fil
 
 head(dep000061_snapshot_ultrasound_files_download_log)
 #&gt;   bucket deployment_id             data_type
-#&gt; 1    gbr     dep000061 ultrasound_recordings
-#&gt; 2    gbr     dep000061    audible_recordings
-#&gt; 3    gbr     dep000061    audible_recordings
+#&gt; 1    gbr     dep000061    audible_recordings
+#&gt; 2    gbr     dep000061 ultrasound_recordings
+#&gt; 3    gbr     dep000061 ultrasound_recordings
 #&gt; 4    gbr     dep000061    audible_recordings
-#&gt; 5    gbr     dep000061 ultrasound_recordings
+#&gt; 5    gbr     dep000061    audible_recordings
 #&gt; 6    gbr     dep000061    audible_recordings
 #&gt;                                                        local_path
-#&gt; 1 ./downloads/dep000061/ultrasound_recordings/20241110_002303.wav
-#&gt; 2    ./downloads/dep000061/audible_recordings/20241026_174502.wav
-#&gt; 3    ./downloads/dep000061/audible_recordings/20240820_210002.wav
-#&gt; 4    ./downloads/dep000061/audible_recordings/20241008_122002.wav
-#&gt; 5 ./downloads/dep000061/ultrasound_recordings/20241113_045303.wav
-#&gt; 6    ./downloads/dep000061/audible_recordings/20241103_014002.wav
+#&gt; 1    ./downloads/dep000061/audible_recordings/20240921_184002.wav
+#&gt; 2 ./downloads/dep000061/ultrasound_recordings/20240712_015702.wav
+#&gt; 3 ./downloads/dep000061/ultrasound_recordings/20240727_213702.wav
+#&gt; 4    ./downloads/dep000061/audible_recordings/20240618_212002.wav
+#&gt; 5    ./downloads/dep000061/audible_recordings/20240924_231002.wav
+#&gt; 6    ./downloads/dep000061/audible_recordings/20240705_020003.wav
 #&gt;           download_status
 #&gt; 1 successfully downloaded
 #&gt; 2 successfully downloaded

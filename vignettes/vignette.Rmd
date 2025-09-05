@@ -24,8 +24,10 @@ This vignette will guide you through:
 - Listing files uploaded to deployments
 - Extracting environmental variables using the NASA power API and R packages, moonlit and elevatr
 
-Note for users: If you are using this guide, it is either because:
-1. You are using a dataframe of species inferences, and you want to download images for a subset of classifications, then derive their crops
+Note, if you are using this guide, it is either because:
+
+1. You are using a dataframe of species inferences, and you want to download images for a subset of classifications, then derive their crops.
+  
 2. You would like to obtain acoustic data for classifications methods of your own.
 
 If you are in the first situation, please go through the report from top to bottom, but skip the section, **Retreiving deployment metadata, listing files within deployments, and downloading files** as this is not relevant to your needs.
@@ -33,6 +35,7 @@ If you are in the first situation, please go through the report from top to bott
 If you are in the second situation, please complete the setup and review the code of conduct then skip to the **Retreiving deployment metadata, listing files within deployments, and downloading files** as the parts inbetween are unlikely to be relevant to your work.
 
 **CODE OF CONDUCT**
+
 Some functionality in this package requires a credentials file, importantly the `download_object_store_files()` function which downloads files from deployments. Downloading object store files requires access to object store credentials. These credentials give you effective write access to the object store. With this in mind:
 
 1. **You must not extract data from other projects without the partners prior permission**
@@ -42,12 +45,15 @@ Some functionality in this package requires a credentials file, importantly the 
 Any breach of this will lead to us invalidating your credentials.
 
 **Disclaimer on downloading data**
+
 Please note that downloading data, particularly high frequency acoustic files, is really time consuming as the files are large and numerous. You will need many hours (sometimes days) to retreive all data under a deployment. If you want to save time, I'd recommend that you instead download only subsets of files, such as files between larger time intervals (e.g., the first file captured every hour). Likewise, if the total file size across your deployments are larger than your storage capacity, consider designing a pipeline that deletes the raw data files after processing them.
 
 ### Setup
 
 ### Installing and Loading the Package
+
 To install **EntoInsights**, use:
+
 ```{r}
 # Install EntoInsights
 # devtools::install_github("AMI-system/EntoInsights")
@@ -56,6 +62,7 @@ library(EntoInsights)
 
 If you are running this from the **source code** (I.E., you have have opened the package's source directory and are testing your edits to the package), load all functions using `devtools::load_all()`
 Next, load the other required packages for this vignette:
+
 ```{r}
 
 # First we will load our dependancies
@@ -89,12 +96,12 @@ classifications_df_rc_rules = append_RC_rules(classifications_df, latitude, long
 Compare the differences between the original classification dataframe and what we have now:
 
 ```{r}
-# Compare what we have added
-str(classifications_df)
-str(classifications_df_rc_rules)
+# Look at what we have added
+str(classifications_df_rc_rules[setdiff(colnames(classifications_df_rc_rules), colnames(classifications_df))])
 ```
 
 As you can see, append_RC_rules, has inserted the following column, with x corresponding to the ranked identification class of the species (In our example dataset, there are 5 top predictions). The columns are:
+
 1. **top_x_species_identification_difficulty**: A number, from 1 - 4, indicating the degree to which the species is difficult to identify. Please see the key below:
 
 ```{r, echo=FALSE}
@@ -111,8 +118,9 @@ df <- data.frame(
 kable(df, col.names = c("Grade", "Description"))
 ```
 
-1. **top_x_species_presence**: Whether the species is present, with respect to its known activity.
-2. **top_x_species_within_date**: Whether the species is active at the given date, with respect to its known phenology.
+2. **top_x_species_presence**: Whether the species is present, with respect to its known activity.
+   
+3. **top_x_species_within_date**: Whether the species is active at the given date, with respect to its known phenology.
 
 You can use the results of the record cleaner to subset depending on your research needs. For example, we could subset out species that are at least somewhat visually distinctive. 
 
@@ -128,13 +136,16 @@ Note some or many species will have NA values, indicating that they do not have 
 Second, the record cleaner was designed to flag unlikely identifications in citizen science records. It is not directly transferable for use in handling AI classification datasets, in that it is designed to flag occasional unlikely identifications, not numerous classifications of an unlikely species by a model. It has a broad range of acceptance of presence, or within date ranges, to account for rare events like second-generation spawnings, or the re-emergence of a species in regions where they were historically present. As a result, it cannot be relied upon by itself to fully filter out unlikely identifications of species.
 
 ### Extracting datetime information
+
 Say you want to efficiently extract the datetimes of recording. Currently, the most straightforward method is to parse it from the filenames. Almost all files retain within the object store retain their datetimes in the filenames, and the function, `parse_AMI_datetimes` streamlines the extraction for you. To use this function, simply run the following chunk. It will provide warnings for the number of rows that fail to parse the datetime.
 
 ```{r}
 # Extract the time of recording
-classifications_df_rc_rules %>%
-mutate(capture_datetime = as.POSIXct(parse_AMI_datetimes(basename(image_path)), origin = "1970-01-01", tz = "UTC")) %>%
-head()
+classifications_df_rc_rules = classifications_df_rc_rules %>%
+mutate(capture_datetime = as.POSIXct(parse_AMI_datetimes(basename(image_path)), origin = "1970-01-01", tz = "UTC"))
+
+# View first 5 values
+classifications_df_rc_rules$capture_datetime[1:5]
 ```
 
 ### Downloading snapshots
@@ -154,9 +165,13 @@ classifications_subset = classifications_df_rc_rules %>% slice_sample(n = 10)
 ```
 
 To download snapshots, please use the `download_object_store_files` function. As input, you will need to provide:
+
 1. The bucket name (bucket): In most instances this is the ISO-3 code of the country, in lower case, e.g., `gbr`. The exeption is the saltmarsh soundscapes project which is `saltmarsh-soundscapes`.
+
 2. The deployment ID (deployment_id): The ID associated with the deployment. If you are uncertain of this, see the image_path of your classifications. The ID should be in the path. For example, `dep000072` in `./data/solar/gbr/dep000072/20240618024000-snapshot.jpg`. This is either a single value or a vector of values, one for each file (if you want to download files across multiple deployments).
+
 3. The data type (data_type): The type of data, being either `snapshot_images`, `motion_images` (in the case of older surveys before early 2024), `ultrasound_recordings`, or `audible_recordings`. For the Saltmarsh Soundscapes project it will be `terrestrial_recordings` or `aquatic_recordings`, This is either a single value or a vector of values, one for each file (if you want to download multiple file types).
+
 4. The filenames of desired files (filename): This is the basename of the files. This will always be called `image_path` inside the classifications tables. To obtain the basename without all the subfolders, please use the `basename()` function.
 
 ```{r}
@@ -180,7 +195,9 @@ head(snapshot_download_log)
 As raised in the warning message, **please use your credentials carefully**, as they give you write access to the contents of the object store. If you have not already please review the code of conduct at the start of this document.
 
 You will have received the following outputs from this process:
+
 1. Snapshots in a `downloads` directory: The snapshots are sorted into subfolders named after the deployment ID and data type. If you have downloaded files from multiple deployments please be careful about moving files between subfolders inside the downloads directory, as this will confuse subsequent download and cropping processes.
+
 2. files_downloaded_log.csv: This logs your deployment IDs, data types, and the local installation path and download status. The download status is either `successfully downloaded`, meaning the file has been downloaded to the download directory, `already downloaded (skipped)` meaning the file already exists in the download directory, or `failed download (see warnings)`, meaning that there was an error that interrupted the download process. In the event that a download failed, the error message should print as a warning. If you cannot see this, please use the warnings() command to recover it.
 
 ### Obtaining crops from downloaded snapshots
@@ -200,7 +217,9 @@ Note that the `crop_and_save_images` function by default saves the classificatio
 The following section will allow you to:
 
 1. Inspect deployment metadata for your analysis including deployment names, locations and IDs associated with the monitoring system and hardware components.
+
 2. List files within buckets and their deployments.
+
 3. Download files from the object store based on an extracted list of files.
 
 This section will be most relevant to users conducting their own acoustic analysis, who do not have a classifications dataframe listing file paths.
@@ -228,8 +247,11 @@ dep000061_metadata = deployments_metadata[which(deployments_metadata$deployment_
 As you can see, the deployment metadata contains basic information associated with each AMI deployment for which we have metadata inside the object store. Most relevant to users analysis is:
 
 1. The bucket name (bucket): In most instances this is the ISO-3 code of the country, in lower case, e.g., `gbr`. The exeption is the saltmarsh soundscapes project which is `saltmarsh-soundscapes`.
+
 2. The deployment ID (deployment_id): The ID associated with the deployment. Please note that some regions such as Panama will have multiple years of surveys. This is either a single value or a vector of values, one for each file (if you want to download files across multiple deployments). Please be careful and make sure you are referencing the correct deployment by reviewing the latitude and longitude information carefully.
+
 3. The data type (data_type): The type of data, being either `snapshot_images`, `motion_images` (in the case of older surveys before early 2024), `ultrasound_recordings`, or `audible_recordings`. For the Saltmarsh Soundscapes project it will be `terrestrial_recordings` or `aquatic_recordings`, This is either a single value or a vector of values, one for each file (if you want to download multiple file types).
+
 4. latitude/longitude: The deployment position registered for the deployment.
 
 **Important** Please be careful about sharing this metadata, and the locations of active deployments need to be kept confidential.
