@@ -21,4 +21,4 @@ devtools::install_github("AMI-system/EntoInsights")
 library(EntoInsights)
 ```
 
-For a more comprehensive description of the package functionality, users are encouraged to consult the vignette (HTML).
+For a more comprehensive description of the package functionality, users are encouraged to consult the vignette.
