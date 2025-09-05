@@ -4,14 +4,14 @@
 \alias{append_RC_rules}
 \title{Append Recording Confidence Rules}
 \usage{
-append_RC_rules(classifications_df, longitude, latitude)
+append_RC_rules(classifications_df, latitude, longitude)
 }
 \arguments{
 \item{classifications_df}{A dataframe containing classifications. This dataset assumes the data is in the format obtained from the classification pipeline on JASMIN.}
 
-\item{longitude}{Longitude of the deployment.}
-
 \item{latitude}{Latitude of the deployment.}
+
+\item{longitude}{Longitude of the deployment.}
 }
 \value{
 The updated classifications dataframe with appended RC rules.

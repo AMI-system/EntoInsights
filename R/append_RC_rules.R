@@ -23,7 +23,7 @@
 #' @import stringr
 #' @import lubridate
 #' @export
-append_RC_rules <- function(classifications_df, longitude, latitude) {
+append_RC_rules <- function(classifications_df, latitude, longitude) {
 
     # Access datasets directly from the package
     data("difficulty_description", package = "EntoInsights")

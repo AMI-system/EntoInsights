@@ -35,10 +35,10 @@ crop_and_save_images <- function(downloaded_files_dir = "./downloads", classific
     stop("The required columns are missing in classifications_df: ", paste(setdiff(required_columns, colnames(classifications_df)), collapse = ", "))
   }
 
-  if (any(!c("deployment_id", "classification_id") %in% colnames(classifications_df))){
-    warning("Deployment_id and/or classification id column is missing. Regenerating both in the output classifications dataframe")
+  if (!"classification_id" %in% colnames(classifications_df)){
+    message("The classification id column is missing. Setting classification ID as the row number")
   
-    classifications_df <- prepare_classifications_df(classifications_df)
+    classifications_df <- classifications_df %>% mutate(classification_id = row_number())
   }
 
   # List downloaded images in a dataframe alongside the deployment ID
