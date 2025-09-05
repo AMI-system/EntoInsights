@@ -114,6 +114,7 @@
 #' <https://doi.org/10.5281/zenodo.8335450>, R package version 0.99.0,
 #' <https://github.com/jhollist/elevatr/>.
 #' 
+#' @export
 
 get_hourly_env_data <- function(latitudes, longitudes,
                                 start_datetime, end_datetime,

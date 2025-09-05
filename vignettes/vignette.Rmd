@@ -50,7 +50,7 @@ Please note that downloading data, particularly high frequency acoustic files, i
 To install **EntoInsights**, use:
 ```{r}
 # Install EntoInsights
-devtools::install_github("AMI-system/EntoInsights")
+# devtools::install_github("AMI-system/EntoInsights")
 library(EntoInsights)
 ```
 
