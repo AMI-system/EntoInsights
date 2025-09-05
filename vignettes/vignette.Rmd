@@ -19,7 +19,7 @@ library(knitr)
 This vignette will guide you through:
 - Cleaning classification records using the **record cleaner** function.
 - Extracting date-time information from filenames.
-- Downloading and processing snapshot and audio and ultrasound images.
+- Downloading and processing snapshot images and audio and ultrasound recordings.
 - Listing deployments in the object store and their associated metadata
 - Listing files uploaded to deployments
 - Extracting environmental variables using the NASA power API and R packages, moonlit and elevatr
