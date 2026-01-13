@@ -14,6 +14,7 @@ The current functionality of the package allows users to:
 ## Installing the package
 
 The package does not have any non-R dependencies and can be installed simply by running:
+What about packages "moonlit" and "elevatr", which say they are required when I ran: devtools::load_all(".")?
 
 ```r
 # Install EntoInsights
