@@ -174,7 +174,7 @@ To download snapshots, please use the `download_object_store_files` function. As
 
 4. The filenames of desired files (filename): This is the basename of the files. This will always be called `image_path` inside the classifications tables. To obtain the basename without all the subfolders, please use the `basename()` function.
 
-```{r}
+```{r, eval=FALSE}
 # Parameters for download
 bucket = classifications_subset$bucket_name
 deployment_id = classifications_subset$deployment_id
@@ -206,7 +206,7 @@ To obtain crops, we need to provide the dataframe with all classifications from 
 
 Each crop has an ID after the class name, e.g., 6 in `lepidoptera_macros_6.jpg`. This ID, called the `classification_id`, pairs the rows in the classifications dataframe with the crops. The classification_id is simply the row number and is generated inside the function unless you create a classification_id column of your own with your own assigned values. 
 
-```{r}
+```{r, eval=FALSE}
 crop_and_save_images(classifications_df = classifications_df_rc_rules, classifications_column = "order_name")
 ```
 
@@ -226,7 +226,7 @@ This section will be most relevant to users conducting their own acoustic analys
 
 The first function will allow you to obtain all deployments directly from the API. Because the deployments are retrieved from the API `get-deployments` endpoint they will always be the most up to date version. To access the API, you will need to provide the API username and password. This is separate from the credentials. If you have uploaded data in the past, this is the username and password quoted in the upload guidelines document. If you are uncertain of the username and password, please contact [Tom August](tomaug@ceh.ac.uk) to request access.
 
-```{r}
+```{r, eval=FALSE}
 
 # Read them back
 api_pass <- readLines("username_password.txt")
@@ -260,7 +260,7 @@ Next, list the files included inside the deployments. This function again requir
 
 For example, say we want to retrieve all audible and ultrasound records under deployment `dep000061`. Please note that this step will take a few minutes. It may be best instead to adjust this first and test it on your own deployment(s).
 
-```{r}
+```{r, eval=FALSE}
 # List all files within deployment dep000061 under data types, 'audible_recordings' and 'ultrasound_recordings'
 dep000061_audible_ultrasound_files <- list_deployment_files(bucket = dep000061_metadata$bucket,
                                   deployment_id = dep000061_metadata$deployment_id,
@@ -273,7 +273,7 @@ dep000061_audible_ultrasound_files <- list_deployment_files(bucket = dep000061_m
 
 We can next use these file lists to download data. For the purpose of the demonstration, we only download 10 random files
 
-```{r}
+```{r, eval=FALSE}
 
 # Take a sample of 10 random files
 dep000061_snapshot_ultrasound_files_subset <- dep000061_audible_ultrasound_files %>% slice_sample(n = 10)
