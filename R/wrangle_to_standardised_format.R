@@ -17,9 +17,9 @@
 #' @return A data.frame containing the wrangled results.
 #' @export
 #'
-wrangle_results <- function(results_file, taxa, filepath_colname,
-                            sitename_colname, latitude_colname, longitude_colname,
-                            topspeciespred_colname, speciesconf_colname){
+wrangle_results <- function(results_file, taxa = "moth", filepath_colname = "image_path",
+                            sitename_colname = "deployment_name", latitude_colname = "latitude", longitude_colname = "longitude",
+                            topspeciespred_colname = "top_1_species", speciesconf_colname = "top_1_confidence"){
 
   # For now, need to check this is for moths (stop if not)
   if (taxa != "moth") {

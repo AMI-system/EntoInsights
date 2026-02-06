@@ -6,13 +6,13 @@
 \usage{
 wrangle_results(
   results_file,
-  taxa,
-  filepath_colname,
-  sitename_colname,
-  latitude_colname,
-  longitude_colname,
-  topspeciespred_colname,
-  speciesconf_colname
+  taxa = "moth",
+  filepath_colname = "image_path",
+  sitename_colname = "deployment_name",
+  latitude_colname = "latitude",
+  longitude_colname = "longitude",
+  topspeciespred_colname = "top_1_species",
+  speciesconf_colname = "top_1_confidence"
 )
 }
 \arguments{
