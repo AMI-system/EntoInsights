@@ -1,3 +1,9 @@
+#' @importFrom dplyr distinct group_by summarise
+#' @importFrom magrittr %>%
+#' @importFrom ggplot2 ggplot aes geom_col geom_tile labs theme element_text scale_x_date
+#' @importFrom lubridate ymd floor_date ceiling_date
+NULL  # <- this line tells roxygen the imports are not attached to any function
+
 #' Calculate number of operational nights (/days)
 #'
 #' @param dataframe Results dataframe
@@ -8,7 +14,7 @@
 calculate_device_operation <- function(dataframe){
 
   operational_nights_df <- dataframe %>%
-    distinct(deployment_id, recording_session)
+    dplyr::distinct(deployment_id, recording_session)
 
   operational_nights <- nrow(operational_nights_df)
 
@@ -27,14 +33,14 @@ plot_device_operation_barplot <- function(dataframe){
 
   # Count number of files per night per deployment
   nightly_counts <- dataframe %>%
-    group_by(site_name, recording_session) %>%
-    summarise(n_files = n_distinct(filepath), .groups = "drop")
+    dplyr::group_by(site_name, recording_session) %>%
+    dplyr::summarise(n_files = n_distinct(filepath), .groups = "drop")
 
   number_operational_nights <- calculate_device_operation(dataframe)
 
   # Plot
-  barplot <- ggplot(nightly_counts, aes(x = recording_session, y = n_files)) +
-    geom_col(fill = "steelblue") +
+  barplot <- ggplot2::ggplot(nightly_counts, aes(x = recording_session, y = n_files)) +
+    ggplot2::geom_col(fill = "steelblue") +
     labs(
       title = sprintf("Total recording nights = %s", number_operational_nights),
       x = "Date",
@@ -67,10 +73,10 @@ plot_device_operation_barplot <- function(dataframe){
 plot_device_operation_tileplot <- function(dataframe){
 
   operational_nights_df <- dataframe %>%
-    distinct(site_name, recording_session)
+    dplyr::distinct(site_name, recording_session)
 
-  tileplot <- ggplot(operational_nights_df, aes(x = recording_session, y = site_name)) +
-    geom_tile(width = 1, height = 0.9, fill = "steelblue") +
+  tileplot <- ggplot2::ggplot(operational_nights_df, aes(x = recording_session, y = site_name)) +
+    ggplot2::geom_tile(width = 1, height = 0.9, fill = "steelblue") +
     scale_x_date(
       limits = c(
         floor_date(min(ymd(operational_nights_df$recording_session)), "month"),
