@@ -1,7 +1,7 @@
-#' @importFrom dplyr distinct n_distinct group_by summarise
+#' @import dplyr
 #' @importFrom magrittr %>%
-#' @importFrom ggplot2 ggplot aes geom_col geom_tile labs theme element_text scale_x_date theme_minimal element_blank
-#' @importFrom lubridate ymd floor_date ceiling_date
+#' @import ggplot2
+#' @import lubridate
 NULL  # <- this line tells roxygen the imports are not attached to any function
 
 #' Calculate number of operational nights (/days)

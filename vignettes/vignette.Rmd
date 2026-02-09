@@ -79,6 +79,15 @@ As I point out in the disclaimer, this section assumes that you working a specie
 ```{r}
 # Load an example classification dataset
 str(classifications_df)
+
+filepath_colname <- "image_path"
+sitename_colname <- "deployment_name"
+latitude_colname <- "latitude"
+longitude_colname <- "longitude"
+topspeciespred_colname <- "top_1_species"
+speciesconf_colname <- "top_1_confidence"
+  
+classifications_df <- wrangle_results(results_file = classifications_df, taxa = "moth", filepath_colname = filepath_colname, sitename_colname = sitename_colname, latitude_colname = latitude_colname, longitude_colname = longitude_colname, topspeciespred_colname = topspeciespred_colname, speciesconf_colname = speciesconf_colname)
 ```
 
 The record cleaner function uses data from the National Biodiversity Network (NBN) Record Cleaner to flag unlikely species with respect to their phenology, distribution and ease of identification. Please cite them in your results. See the following link for more information: https://nbn.org.uk/tools-and-resources/nbn-record-cleaner/. 
@@ -126,7 +135,7 @@ You can use the results of the record cleaner to subset depending on your resear
 
 ```{r}
 classifications_df_rc_rules = classifications_df_rc_rules %>%
-filter(top_1_species_identification_difficulty < 3)
+filter(top_species_prediction_identification_difficulty < 3)
 ```
 
 There are a couple considerations when using the record cleaner:
@@ -142,7 +151,7 @@ Say you want to efficiently extract the datetimes of recording. Currently, the m
 ```{r}
 # Extract the time of recording
 classifications_df_rc_rules = classifications_df_rc_rules %>%
-mutate(capture_datetime = as.POSIXct(parse_AMI_datetimes(basename(image_path)), origin = "1970-01-01", tz = "UTC"))
+mutate(capture_datetime = as.POSIXct(parse_AMI_datetimes(basename(filepath)), origin = "1970-01-01", tz = "UTC"))
 
 # View first 5 values
 classifications_df_rc_rules$capture_datetime[1:5]
@@ -172,14 +181,14 @@ To download snapshots, please use the `download_object_store_files` function. As
 
 3. The data type (data_type): The type of data, being either `snapshot_images`, `motion_images` (in the case of older surveys before early 2024), `ultrasound_recordings`, or `audible_recordings`. For the Saltmarsh Soundscapes project it will be `terrestrial_recordings` or `aquatic_recordings`, This is either a single value or a vector of values, one for each file (if you want to download multiple file types).
 
-4. The filenames of desired files (filename): This is the basename of the files. This will always be called `image_path` inside the classifications tables. To obtain the basename without all the subfolders, please use the `basename()` function.
+4. The filenames of desired files (filename): This is the basename of the files. This will always be called `image_path` inside the classifications tables (before wrangling). To obtain the basename without all the subfolders, please use the `basename()` function.
 
 ```{r, eval=FALSE}
 # Parameters for download
 bucket = classifications_subset$bucket_name
 deployment_id = classifications_subset$deployment_id
 data_type = "snapshot_images"
-filenames = basename(classifications_subset$image_path)
+filenames = basename(classifications_subset$filepath)
 
 # Download the snapshots
 snapshot_download_log <- download_object_store_files(

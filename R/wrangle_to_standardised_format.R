@@ -29,12 +29,19 @@ wrangle_results <- function(results_file, taxa = "moth", filepath_colname = "ima
   # # For testing
   # results_file <- "C:/Users/graski/OneDrive - UKCEH/part-time_PhD/AgZero+/analysis/agzero_ami_2024_data/east_hendred/combined_results.csv"
 
-  # Check file exists
-  if (!file.exists(results_file)) {
-    stop("File does not exist: ", results_file)
-  }
+  # Load results
+  if (is.character(results_file)) {
+    if (!file.exists(results_file)) {
+      stop("File does not exist: ", results_file)
+    }
+    results <- read.csv(results_file)
 
-  results <- read.csv(results_file)
+  } else if (is.data.frame(results_file)) {
+    results <- results_file
+
+  } else {
+    stop("results_file must be a file path or a data frame")
+  }
 
   ### Checks and wrangling
 
