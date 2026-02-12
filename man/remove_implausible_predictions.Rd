@@ -2,16 +2,39 @@
 % Please edit documentation in R/append_RC_rules.R
 \name{remove_implausible_predictions}
 \alias{remove_implausible_predictions}
-\title{Remove implausaible rows based on recording Confidence Rules}
+\title{Remove implausible rows based on recording Confidence Rules}
 \usage{
-remove_implausible_predictions(dataframe_with_rc)
+remove_implausible_predictions(
+  dataframe_with_rc,
+  filter_location = TRUE,
+  filter_date = TRUE,
+  filter_id_difficulty = TRUE,
+  max_id_difficulty = 2
+)
 }
 \arguments{
-\item{classifications_df}{A dataframe containing classifications with record confidence rules appended. This dataset assumes the data is in the format obtained from the classification pipeline on JASMIN.}
+\item{dataframe_with_rc}{A dataframe containing classifications with record
+confidence rules appended. This dataset assumes the data is in the format
+obtained from the classification pipeline on JASMIN.}
+
+\item{filter_location}{Logical. If TRUE (default), remove rows where
+\code{top_species_prediction_presence == 0}. NA values are always retained.}
+
+\item{filter_date}{Logical. If TRUE (default), remove rows where
+\code{top_species_prediction_within_date == 0}. NA values are always retained.}
+
+\item{filter_id_difficulty}{Logical. If TRUE (default), filter based on
+identification difficulty. NA values are always retained.}
+
+\item{max_id_difficulty}{Integer. Maximum identification difficulty level
+to retain (default = 2, i.e., keep difficulty 1 or 2. Species with an identification
+difficulty of great than 2 are difficult to identify, and even experienced recorders
+may be expected to provide additional evidence). NA values are always retained.}
 }
 \value{
-The updated classifications dataframe with rows with implausible predictions removed.
+The updated dataframe with implausible predictions removed
 }
 \description{
-This function removes rows in the dataframe where the prediction is implausible (based on location and/or date)
+This function removes rows in the dataframe where the prediction is implausible
+based on location, date, and/or identification difficulty.
 }

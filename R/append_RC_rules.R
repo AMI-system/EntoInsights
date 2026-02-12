@@ -149,25 +149,61 @@ append_RC_rules <- function(classifications_df, latitude, longitude) {
     return(classifications_df)
 }
 
-#' Remove implausaible rows based on recording Confidence Rules
+#' Remove implausible rows based on recording Confidence Rules
 #'
-#' This function removes rows in the dataframe where the prediction is implausible (based on location and/or date)
+#' This function removes rows in the dataframe where the prediction is implausible
+#' based on location, date, and/or identification difficulty.
 #'
-#' @param classifications_df A dataframe containing classifications with record confidence rules appended. This dataset assumes the data is in the format obtained from the classification pipeline on JASMIN.
+#' @param dataframe_with_rc A dataframe containing classifications with record
+#'   confidence rules appended. This dataset assumes the data is in the format
+#'   obtained from the classification pipeline on JASMIN.
+#' @param filter_location Logical. If TRUE (default), remove rows where
+#'   `top_species_prediction_presence == 0`. NA values are always retained.
+#' @param filter_date Logical. If TRUE (default), remove rows where
+#'   `top_species_prediction_within_date == 0`. NA values are always retained.
+#' @param filter_id_difficulty Logical. If TRUE (default), filter based on
+#'   identification difficulty. NA values are always retained.
+#' @param max_id_difficulty Integer. Maximum identification difficulty level
+#'   to retain (default = 2, i.e., keep difficulty 1 or 2. Species with an identification
+#'   difficulty of great than 2 are difficult to identify, and even experienced recorders
+#'   may be expected to provide additional evidence). NA values are always retained.
 #'
-#' @return The updated classifications dataframe with rows with implausible predictions removed.
+#' @return The updated dataframe with implausible predictions removed
 #'
 #' @import dplyr
+#' @importFrom magrittr %>%
 #' @export
-remove_implausible_predictions <- function(dataframe_with_rc){
+remove_implausible_predictions <- function(dataframe_with_rc,
+                                           filter_location = TRUE,
+                                           filter_date = TRUE,
+                                           filter_id_difficulty = TRUE,
+                                           max_id_difficulty = 2){
 
-  refined_dataframe <- dataframe_with_rc %>%
-    filter(
-      is.na(top_species_prediction_presence) | top_species_prediction_presence != 0,  # Keep NA or non-zero values (deleting anything with 0)
-      is.na(top_species_prediction_within_date) | top_species_prediction_within_date != 0  # Keep NA or non-zero values in specific_label_within_date (deleting anything with 0)
-    )
+  refined_dataframe <- dataframe_with_rc
+
+  if (filter_location) {
+    refined_dataframe <- refined_dataframe %>%
+      filter(
+        is.na(top_species_prediction_presence) |
+          top_species_prediction_presence != 0
+      )
+  }
+
+  if (filter_date) {
+    refined_dataframe <- refined_dataframe %>%
+      filter(
+        is.na(top_species_prediction_within_date) |
+          top_species_prediction_within_date != 0
+      )
+  }
+
+  if (filter_id_difficulty) {
+    refined_dataframe <- refined_dataframe %>%
+      filter(
+        is.na(top_species_prediction_identification_difficulty) |
+          top_species_prediction_identification_difficulty <= max_id_difficulty
+      )
+  }
 
   return(refined_dataframe)
-
 }
-
