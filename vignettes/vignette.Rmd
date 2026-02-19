@@ -163,7 +163,7 @@ In this stage, you will download snapshot images and audio files from the object
 
 ```{r}
 # Create your credentials
-# create_credentials("my_access_key", "my_secret_key")
+create_credentials("my_access_key", "my_secret_key")
 ```
 
 This will save a credentials JSON file within your working directory. Now you can begin downloading data from the object store!

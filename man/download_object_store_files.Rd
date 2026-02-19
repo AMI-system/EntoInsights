@@ -15,13 +15,15 @@ download_object_store_files(
 )
 }
 \arguments{
-\item{bucket}{Character. Name of the S3 bucket.}
+\item{bucket}{Character. Name of the S3 bucket e.g., gbr}
 
-\item{deployment_id}{Character vector or single value. Deployment ID corresponding to each file.}
+\item{deployment_id}{Character vector or single value. Deployment ID corresponding to each file.
+If you are uncertain of this, see the image_path of your classifications, as the ID should be in the path.}
 
-\item{data_type}{Character vector or single value. Data type(s) corresponding to each file.}
+\item{data_type}{Character vector or single value. Data type(s) corresponding to each file.
+E.g., snapshot_images, motion_images, ultrasound_recordings, or audible_recordings}
 
-\item{filename}{Character vector. List of filenames to download.}
+\item{filename}{Character vector. List of basename filenames to download.}
 
 \item{download_path}{Character. Local directory where files will be downloaded. Default is "./downloads".}
 
