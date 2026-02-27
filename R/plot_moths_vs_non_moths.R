@@ -56,6 +56,7 @@ plot_moths_vs_nonmoths <- function(dataframe, moth_nonmoth_classifier = TRUE, or
     ) +
       geom_col(width = 0.6) +
       scale_y_continuous(labels = scales::percent) +
+      scale_fill_brewer(palette = "Dark2") +
       labs(
         x = NULL,
         y = "Proportion of detections",
@@ -107,6 +108,7 @@ plot_moths_vs_nonmoths <- function(dataframe, moth_nonmoth_classifier = TRUE, or
     ) +
       geom_col(width = 0.6) +
       scale_y_continuous(labels = scales::percent) +
+      scale_fill_brewer(palette = "Dark2") +
       labs(
         x = NULL,
         y = "Proportion of detections",
