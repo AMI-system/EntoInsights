@@ -125,7 +125,7 @@ plot_device_operation_calendar <- function(dataframe){
     stop(
       paste(
         "Data must contain exactly one year.",
-        "Years detected:", paste(years_present, collapse = ", ")
+        "Years detected:", paste(year_to_plot, collapse = ", ")
       )
     )
   }

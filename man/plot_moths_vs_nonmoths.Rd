@@ -9,7 +9,8 @@ plot_moths_vs_nonmoths(
   dataframe,
   moth_nonmoth_classifier = TRUE,
   order_classifier = TRUE,
-  conf_threshold = 0.8
+  conf_threshold = 0.8,
+  type = c("bar", "pie")
 )
 }
 \arguments{
@@ -21,6 +22,8 @@ plot_moths_vs_nonmoths(
 
 \item{conf_threshold}{Numeric value between 0 and 1 giving the confidence threshold used to split moth classifications
 into high- and low-confidence groups (default 0.8).}
+
+\item{type}{Whether to plot a bar or pie chart}
 }
 \value{
 A  barplot showing the proportion of moths to non-moths in the dataset

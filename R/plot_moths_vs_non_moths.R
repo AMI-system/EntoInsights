@@ -13,17 +13,19 @@ NULL  # <- this line tells roxygen the imports are not attached to any function
 #' @param order_classifier TRUE or FALSE depending on whether users wants plot for the order classifier
 #' @param conf_threshold Numeric value between 0 and 1 giving the confidence threshold used to split moth classifications
 #'  into high- and low-confidence groups (default 0.8).
+#' @param type Whether to plot a bar or pie chart
 #'
 #' @return A  barplot showing the proportion of moths to non-moths in the dataset
 #'
 #' @export
-plot_moths_vs_nonmoths <- function(dataframe, moth_nonmoth_classifier = TRUE, order_classifier = TRUE, conf_threshold = 0.8){
+plot_moths_vs_nonmoths <- function(dataframe, moth_nonmoth_classifier = TRUE, order_classifier = TRUE, conf_threshold = 0.8, type = c("bar", "pie")){
 
+  type <- match.arg(type)
   plots <- list()
 
   if (moth_nonmoth_classifier) { # == TRUE
     # Plot a visualisation of the proportion of detections classified as a moth (class_name == "moth") or a non-moth by the moth_non_moth_classifier.
-    # I'd like to see a breakdown in confidence of those classified as a moth e.g., proportion above 0.8 confidence (class_confidence >= 0.8)
+    # Include breakdown in confidence of those classified as a moth e.g., proportion above 0.8 confidence (class_confidence >= 0.8)
 
     high_label <- paste0("Moth (\u2265 ", conf_threshold, " confidence)")
     low_label  <- paste0("Moth (< ",  conf_threshold, " confidence)")
@@ -50,24 +52,41 @@ plot_moths_vs_nonmoths <- function(dataframe, moth_nonmoth_classifier = TRUE, or
         classifier = "Moth / non-moth classifier"
       )
 
-    plots$moth_nomoth <- ggplot(
-      moth_nm_summary,
-      aes(x = classifier, y = proportion, fill = category)
-    ) +
-      geom_col(width = 0.6) +
-      scale_y_continuous(labels = scales::percent) +
-      scale_fill_brewer(palette = "Dark2") +
-      labs(
-        x = NULL,
-        y = "Proportion of detections",
-        fill = NULL
+    if (type == "bar") {
+      plots$moth_nomoth <- ggplot(
+        moth_nm_summary,
+        aes(x = classifier, y = proportion, fill = category)
       ) +
-      theme_minimal() +
-      theme(
-        axis.text.x = element_text(size = 16),
-        axis.text.y = element_text(size = 16),
-        axis.title.y = element_text(size = 18)
-      )
+        geom_col(width = 0.6) +
+        scale_y_continuous(labels = scales::percent) +
+        scale_fill_brewer(palette = "Dark2") +
+        labs(
+          x = NULL,
+          y = "Proportion of detections",
+          fill = NULL
+        ) +
+        theme_minimal() +
+        theme(
+          axis.text.x = element_text(size = 16),
+          axis.text.y = element_text(size = 16),
+          axis.title.y = element_text(size = 18)
+        )
+    } else if (type == "pie") {
+      plots$moth_nomoth <- ggplot(
+        moth_nm_summary,
+        aes(x = "", y = proportion, fill = category)
+      ) +
+        geom_bar(stat = "identity", width = 1) +
+        coord_polar(theta = "y") +
+        scale_fill_brewer(palette = "Dark2") +
+        labs(x = NULL, y = NULL, fill = NULL, title = "Moth vs non-moth classifier") +
+        geom_text(aes(label = scales::percent(proportion)),
+                  position = position_stack(vjust = 0.5),
+                  size = 8) +
+        theme_void() +
+        theme(legend.text = element_text(size = 16),
+              title = element_text(size = 18))
+    }
 
   }
 
@@ -102,24 +121,41 @@ plot_moths_vs_nonmoths <- function(dataframe, moth_nonmoth_classifier = TRUE, or
         classifier = "Order classifier"
       )
 
-    plots$order <- ggplot(
-      order_summary,
-      aes(x = classifier, y = proportion, fill = category)
-    ) +
-      geom_col(width = 0.6) +
-      scale_y_continuous(labels = scales::percent) +
-      scale_fill_brewer(palette = "Dark2") +
-      labs(
-        x = NULL,
-        y = "Proportion of detections",
-        fill = NULL
+    if (type == "bar") {
+      plots$order <- ggplot(
+        order_summary,
+        aes(x = classifier, y = proportion, fill = category)
       ) +
-      theme_minimal() +
-      theme(
-        axis.text.x = element_text(size = 16),
-        axis.text.y = element_text(size = 16),
-        axis.title.y = element_text(size = 18)
-      )
+        geom_col(width = 0.6) +
+        scale_y_continuous(labels = scales::percent) +
+        scale_fill_brewer(palette = "Dark2") +
+        labs(
+          x = NULL,
+          y = "Proportion of detections",
+          fill = NULL
+        ) +
+        theme_minimal() +
+        theme(
+          axis.text.x = element_text(size = 16),
+          axis.text.y = element_text(size = 16),
+          axis.title.y = element_text(size = 18)
+        )
+    } else if (type == "pie") {
+      plots$order <- ggplot(
+        order_summary,
+        aes(x = "", y = proportion, fill = category)
+      ) +
+        geom_bar(stat = "identity", width = 1) +
+        coord_polar(theta = "y") +
+        scale_fill_brewer(palette = "Dark2") +
+        labs(x = NULL, y = NULL, fill = NULL, title = "Taxonomic order classifier") +
+        geom_text(aes(label = scales::percent(proportion)),
+                  position = position_stack(vjust = 0.5),
+                  size = 8) +
+        theme_void() +
+        theme(legend.text = element_text(size = 16),
+              title = element_text(size = 18))
+    }
   }
 
   # If both true, plot 2 plots next to each other
