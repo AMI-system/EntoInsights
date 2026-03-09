@@ -10,7 +10,7 @@ plot_device_operation_tileplot(dataframe)
 \item{dataframe}{Results dataframe}
 }
 \value{
-A ggplot tileplot of nightly file counts e.g., number of images
+A ggplot tileplot of nightly operation
 }
 \description{
 Create a 2nd option for a figure showing technology operational period (simpler but less detailed)

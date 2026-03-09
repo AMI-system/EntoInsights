@@ -67,7 +67,7 @@ plot_device_operation_barplot <- function(dataframe){
 #'
 #' @param dataframe Results dataframe
 #'
-#' @return A ggplot tileplot of nightly file counts e.g., number of images
+#' @return A ggplot tileplot of nightly operation
 #' @export
 #'
 plot_device_operation_tileplot <- function(dataframe){
@@ -93,5 +93,56 @@ plot_device_operation_tileplot <- function(dataframe){
     )
 
   return(tileplot)
+
+}
+
+#' Create a 3rd option for a figure showing technology operational period using calendar plot
+#'
+#' @param dataframe Results dataframe
+#' @import openair
+#' @importFrom tidyr complete
+#'
+#' @return An openair calendar plot of device operation
+#' @export
+#'
+plot_device_operation_calendar <- function(dataframe){
+
+  # Count number of files per night per deployment
+  nightly_counts <- dataframe %>%
+    dplyr::group_by(site_name, recording_session) %>%
+    dplyr::summarise(n_files = n_distinct(filepath), .groups = "drop")
+
+  calendar_data <- nightly_counts %>%
+    mutate(date = recording_session) %>%
+    complete(
+      site_name,
+      date = seq(min(date), max(date), by = "day")
+    )
+
+  year_to_plot <- unique(year(calendar_data$date))
+
+  if(length(year_to_plot) != 1){
+    stop(
+      paste(
+        "Data must contain exactly one year.",
+        "Years detected:", paste(years_present, collapse = ", ")
+      )
+    )
+  }
+
+  month_range <- range(lubridate::month(calendar_data$date), na.rm = TRUE)
+  months_to_plot <- seq(month_range[1], month_range[2])
+
+  calendar_plot <- openair::calendarPlot(
+    calendar_data,
+    date = "date",
+    pollutant = "n_files",
+    year = year_to_plot,
+    month = months_to_plot,
+    key.header = "Number of images",
+    key.position	= "top"
+  )
+
+  return(calendar_plot)
 
 }
