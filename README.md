@@ -9,8 +9,11 @@ The package does not have any non-R dependencies and can be installed simply by 
 ```r
 # Install devtools if needed
 install.packages("devtools")
+
 # Install EntoInsights from GitHub
 devtools::install_github("AMI-system/EntoInsights")
+
+# Load the package
 library(EntoInsights)
 ```
 
@@ -35,8 +38,8 @@ The current functionality of the package allows:
 * Data visualisation
     * Plot operational periods of devices in various formats (bar, calendar, or tile plots).
     * Create interactive Leaflet maps showing technology deployment locations.
-    * Plot number of detections (activity) or species richness over time using line or bubble plots.
     * Visualise the proportion of moths vs non-moths.
+    * Plot number of detections (activity) or species richness over time using line or bubble plots.
 * Additional functionalities
     * Extract environmental variables using the NASA POWER API and the R packages **moonlit** and **elevatr**.
 
@@ -44,12 +47,13 @@ For a full list of all functions, run:
 ```r
 help(package = "EntoInsights")
 ```
-The vignette also includes a more in-depth example of the package functionality.
+The vignette also includes a more in-depth example of the package functionality. The vignette uses the `/data/classifications_df.rda` example dataset.
 
 ## Minimal example workflow
-This example demonstrates a typical workflow using the included `classifications_df`:
+This example demonstrates a typical workflow using the included `/data/example_data.rda` example dataset:
 
 ```r
+# Load the package
 library(EntoInsights)
 
 # Load dependencies
