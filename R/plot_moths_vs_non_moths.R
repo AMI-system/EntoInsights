@@ -80,7 +80,7 @@ plot_moths_vs_nonmoths <- function(dataframe, moth_nonmoth_classifier = TRUE, or
         coord_polar(theta = "y") +
         scale_fill_brewer(palette = "Dark2") +
         labs(x = NULL, y = NULL, fill = NULL, title = "Moth vs non-moth classifier") +
-        geom_text(aes(label = scales::percent(proportion)),
+        geom_text(aes(label = scales::percent(proportion, accuracy = 1)),
                   position = position_stack(vjust = 0.5),
                   size = 8) +
         theme_void() +
@@ -149,7 +149,7 @@ plot_moths_vs_nonmoths <- function(dataframe, moth_nonmoth_classifier = TRUE, or
         coord_polar(theta = "y") +
         scale_fill_brewer(palette = "Dark2") +
         labs(x = NULL, y = NULL, fill = NULL, title = "Taxonomic order classifier") +
-        geom_text(aes(label = scales::percent(proportion)),
+        geom_text(aes(label = scales::percent(proportion, accuracy = 1)),
                   position = position_stack(vjust = 0.5),
                   size = 8) +
         theme_void() +
