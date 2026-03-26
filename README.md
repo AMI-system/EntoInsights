@@ -1,4 +1,4 @@
-# EntoInsights
+# EntoInsights [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC_BY_NC_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
 
 The **EntoInsights** R package provides a range of functions to support users of the Automated Monitoring of Insects (AMI) and LepiSense systems. Its functionality broadly assists users who wish to analyse classification datasets, as well as partners reviewing and retrieving their uploaded image and acoustic datasets.
 
