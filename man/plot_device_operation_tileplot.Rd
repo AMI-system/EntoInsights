@@ -10,7 +10,7 @@ plot_device_operation_tileplot(dataframe)
 \item{dataframe}{Results dataframe}
 }
 \value{
-A ggplot tileplot of nightly operation
+A ggplot tileplot of recording session operation
 }
 \description{
 Create a 2nd option for a figure showing technology operational period (simpler but less detailed)

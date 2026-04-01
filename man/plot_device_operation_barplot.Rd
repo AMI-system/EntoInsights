@@ -10,7 +10,7 @@ plot_device_operation_barplot(dataframe)
 \item{dataframe}{Results dataframe}
 }
 \value{
-A ggplot barplot of nightly file counts e.g., number of images
+A ggplot barplot of recording session file counts e.g., number of images
 }
 \description{
 Create a figure showing technology operational period and how many files per night

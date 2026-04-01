@@ -13,12 +13,20 @@ NULL  # <- this line tells roxygen the imports are not attached to any function
 #'
 calculate_device_operation <- function(dataframe){
 
-  operational_nights_df <- dataframe %>%
-    dplyr::distinct(deployment_id, recording_session)
+  operational_sessions_df <- dataframe %>%
+    dplyr::group_by(deployment_id, recording_session) %>%
+    dplyr::summarise(
+      n_records = dplyr::n_distinct(filepath),
+      .groups = "drop"
+    )
 
-  operational_nights <- nrow(operational_nights_df)
+  # Keep only sessions with >10 records
+  valid_sessions <- operational_sessions_df %>%
+    dplyr::filter(n_records >= 10)
 
-  return(operational_nights)
+  n_valid_sessions <- nrow(valid_sessions)
+
+  return(n_valid_sessions)
 
 }
 
@@ -26,23 +34,24 @@ calculate_device_operation <- function(dataframe){
 #'
 #' @param dataframe Results dataframe
 #'
-#' @return A ggplot barplot of nightly file counts e.g., number of images
+#' @return A ggplot barplot of recording session file counts e.g., number of images
 #' @export
 #'
 plot_device_operation_barplot <- function(dataframe){
 
-  # Count number of files per night per deployment
-  nightly_counts <- dataframe %>%
+  # Count number of files per recording session per deployment
+  session_counts <- dataframe %>%
     dplyr::group_by(site_name, recording_session) %>%
-    dplyr::summarise(n_files = n_distinct(filepath), .groups = "drop")
+    dplyr::summarise(n_files = n_distinct(filepath), .groups = "drop") %>%
+    dplyr::filter(n_files >= 10)
 
-  number_operational_nights <- calculate_device_operation(dataframe)
+  number_operational_sessions <- calculate_device_operation(dataframe)
 
   # Plot
-  barplot <- ggplot2::ggplot(nightly_counts, aes(x = recording_session, y = n_files)) +
+  barplot <- ggplot2::ggplot(session_counts, aes(x = recording_session, y = n_files)) +
     ggplot2::geom_col(fill = "steelblue") +
     labs(
-      title = sprintf("Total recording nights = %s", number_operational_nights),
+      title = sprintf("Total recording sessions = %s", number_operational_sessions),
       x = "Date",
       y = "Number of Files"
     ) +
@@ -67,20 +76,20 @@ plot_device_operation_barplot <- function(dataframe){
 #'
 #' @param dataframe Results dataframe
 #'
-#' @return A ggplot tileplot of nightly operation
+#' @return A ggplot tileplot of recording session operation
 #' @export
 #'
 plot_device_operation_tileplot <- function(dataframe){
 
-  operational_nights_df <- dataframe %>%
+  operational_sessions_df <- dataframe %>%
     dplyr::distinct(site_name, recording_session)
 
-  tileplot <- ggplot2::ggplot(operational_nights_df, aes(x = recording_session, y = site_name)) +
+  tileplot <- ggplot2::ggplot(operational_sessions_df, aes(x = recording_session, y = site_name)) +
     ggplot2::geom_tile(width = 1, height = 0.9, fill = "steelblue") +
     scale_x_date(
       limits = c(
-        floor_date(min(ymd(operational_nights_df$recording_session)), "month"),
-        ceiling_date(max(ymd(operational_nights_df$recording_session)), "month")
+        floor_date(min(ymd(operational_sessions_df$recording_session)), "month"),
+        ceiling_date(max(ymd(operational_sessions_df$recording_session)), "month")
       ),
       date_breaks = "1 month",
       date_labels = "%b"
@@ -108,11 +117,12 @@ plot_device_operation_tileplot <- function(dataframe){
 plot_device_operation_calendar <- function(dataframe){
 
   # Count number of files per night per deployment
-  nightly_counts <- dataframe %>%
+  session_counts <- dataframe %>%
     dplyr::group_by(site_name, recording_session) %>%
-    dplyr::summarise(n_files = n_distinct(filepath), .groups = "drop")
+    dplyr::summarise(n_files = n_distinct(filepath), .groups = "drop") %>%
+    dplyr::filter(n_files >= 10)
 
-  calendar_data <- nightly_counts %>%
+  calendar_data <- session_counts %>%
     mutate(date = recording_session) %>%
     complete(
       site_name,
@@ -139,7 +149,7 @@ plot_device_operation_calendar <- function(dataframe){
     pollutant = "n_files",
     year = year_to_plot,
     month = months_to_plot,
-    key.header = "Number of images",
+    key.header = "Number of files",
     key.position	= "top"
   )
 
