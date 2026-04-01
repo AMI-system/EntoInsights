@@ -10,8 +10,8 @@ plot_activity_graph(dataframe, type)
 \item{dataframe}{Results dataframe containing classifications.}
 
 \item{type}{Character string specifying what to plot.
-\code{"detections"} will show the number of detected individuals per night,
-\code{"species"} will show the number of unique species detected per night.}
+\code{"detections"} will show the number of detected individuals per night/day,
+\code{"species"} will show the number of unique species detected per night/day.}
 }
 \value{
 ggplot graph of activity (detections or species) over the deployment period

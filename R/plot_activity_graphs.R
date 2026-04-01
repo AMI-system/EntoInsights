@@ -2,8 +2,8 @@
 #'
 #' @param dataframe Results dataframe containing classifications.
 #' @param type Character string specifying what to plot.
-#'    `"detections"` will show the number of detected individuals per night,
-#'    `"species"` will show the number of unique species detected per night.
+#'    `"detections"` will show the number of detected individuals per night/day,
+#'    `"species"` will show the number of unique species detected per night/day.
 #'
 #' @return ggplot graph of activity (detections or species) over the deployment period
 #'
@@ -19,13 +19,23 @@ plot_activity_graph <- function(dataframe, type){
   }
 
   all_nights <- dataframe %>%
-    distinct(recording_session) %>%
-    mutate(recording_session = as.Date(recording_session))
+    dplyr::group_by(recording_session) %>%
+    dplyr::summarise(
+      n_records = dplyr::n_distinct(filepath),
+      .groups = "drop"
+    ) %>%
+    dplyr::filter(n_records >= 10) %>% # keep only sessions where at least 10 files were recorded
+    dplyr::select(recording_session) %>%
+    dplyr::mutate(recording_session = as.Date(recording_session))
+
+  if ("crop_status" %in% names(dataframe)) {
+    dataframe <- dataframe %>%
+      dplyr::filter(crop_status != "No detections for this image.")
+  }
 
   if (type == "detections"){
 
     detections_df <- dataframe %>%
-      filter(crop_status != "No detections for this image.") %>%
       group_by(recording_session) %>%
       summarise(n_detections = n(), .groups = "drop")
 
@@ -35,7 +45,7 @@ plot_activity_graph <- function(dataframe, type){
 
     detections_plot <- ggplot(detections_complete, aes(x = recording_session, y = n_detections)) +
       geom_point(size=3) +
-      labs(x = "Night", y = "Number of detections") +
+      labs(x = "Recording session", y = "Number of detections") +
       geom_line(linewidth=1) +
       scale_x_date(
         date_breaks = "2 weeks",
@@ -54,7 +64,6 @@ plot_activity_graph <- function(dataframe, type){
   } else { # make species graph
 
     species_df <- dataframe %>%
-      filter(crop_status != "No detections for this image.") %>%
       group_by(recording_session) %>%
       summarise(n_species = n_distinct(top_species_prediction), .groups = "drop")
 
@@ -64,7 +73,7 @@ plot_activity_graph <- function(dataframe, type){
 
     species_plot <- ggplot(species_complete, aes(x = recording_session, y = n_species)) +
       geom_point(size=3) +
-      labs(x = "Night", y = "Number of species") +
+      labs(x = "Recording session", y = "Number of species") +
       geom_line(linewidth=1) +
       scale_x_date(
         date_breaks = "2 weeks",
