@@ -2,7 +2,7 @@
 % Please edit documentation in R/append_RC_rules.R
 \name{append_RC_rules}
 \alias{append_RC_rules}
-\title{Append Recording Confidence Rules}
+\title{Append Recording Confidence Rules for moths}
 \usage{
 append_RC_rules(classifications_df, latitude, longitude)
 }

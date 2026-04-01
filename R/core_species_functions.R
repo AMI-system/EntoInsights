@@ -4,7 +4,7 @@ NULL # <- this line tells roxygen the imports are not attached to any function
 
 #' Summarise species activity over the deployment period
 #'
-#' Calculates total detections and total nights detected (raw count).
+#' Calculates total detections and total nights/days detected (raw count).
 #'
 #' @param dataframe Results dataframe containing classifications.
 #'
@@ -16,16 +16,20 @@ NULL # <- this line tells roxygen the imports are not attached to any function
 #' @export
 summarise_species_activity <- function(dataframe) {
 
+  if ("crop_status" %in% names(dataframe)) {
+    dataframe <- dataframe %>%
+      dplyr::filter(crop_status != "No detections for this image.")
+  }
+
   species_summary <- dataframe %>%
     filter(
-      crop_status != "No detections for this image.",
       top_species_prediction != "",
       !is.na(top_species_prediction)
     ) %>%
     group_by(top_species_prediction) %>%
     summarise(
       total_detections = n(),
-      nights_detected  = n_distinct(recording_session),
+      sessions_detected  = n_distinct(recording_session),
       .groups = "drop"
     ) %>%
     arrange(desc(total_detections))
@@ -45,7 +49,7 @@ summarise_species_activity <- function(dataframe) {
 #' This is a helper function that calls \code{\link{summarise_species_activity}} internally.
 #' Use this function when you want to quickly get the species most frequently detected over the deployment period.
 #'
-#' @seealso \code{\link{summarise_species_activity}}, \code{\link{get_top_species_nights}}
+#' @seealso \code{\link{summarise_species_activity}}, \code{\link{get_top_species_sessions}}
 #'
 #' @export
 get_top_species_total <- function(dataframe, n = 10) {
@@ -55,33 +59,33 @@ get_top_species_total <- function(dataframe, n = 10) {
     slice_head(n = n)
 }
 
-#' Get top species ranked by nights detected
+#' Get top species ranked by nights/days detected
 #'
 #' @param dataframe Results dataframe.
 #' @param n Number of species to return (default 10).
 #'
-#' @return Dataframe of top species ranked by nights detected.
+#' @return Dataframe of top species ranked by nights/days detected.
 #'
 #' @details
 #' This is a helper function that calls \code{\link{summarise_species_activity}} internally.
-#' Use this function to find species that were consistently detected across multiple nights, regardless of total counts.
+#' Use this function to find species that were consistently detected across multiple nights/days, regardless of total counts.
 #'
 #' @seealso \code{\link{summarise_species_activity}}, \code{\link{get_top_species_total}}
 #'
 #' @export
-get_top_species_nights <- function(dataframe, n = 10) {
+get_top_species_sessions <- function(dataframe, n = 10) {
 
   summarise_species_activity(dataframe) %>%
-    arrange(desc(nights_detected)) %>%
+    arrange(desc(sessions_detected)) %>%
     slice_head(n = n)
 }
 
 #' Plot activity of top species over time using line-style plot
 #'
 #' @param dataframe Results dataframe.
-#' @param type Character. Determines which species to plot: "detections", "nights", or "both". Default = "detections".
+#' @param type Character. Determines which species to plot: "detections", "sessions", or "both". Default = "detections".
 #'   - "detections": plot species with the highest total number of detections over the deployment.
-#'   - "nights": plot species detected on the most nights (regardless of number of detections per night).
+#'   - "sessions": plot species detected on the most sessions (regardless of number of detections per night/day).
 #'   - "both": plot species from both criteria. Species may appear in one or both groups. Line type indicates which ranking the species belongs to.
 #' @param style "overlay" or "facet". Default = "overlay".
 #' @param n Number of species to include (default 2). Maximum 8 species plotted.
@@ -89,15 +93,15 @@ get_top_species_nights <- function(dataframe, n = 10) {
 #' @return ggplot object.
 #'
 #' @details
-#' This function internally calls \code{\link{summarise_species_activity}} to determine the total detections and nights detected per species.
+#' This function internally calls \code{\link{summarise_species_activity}} to determine the total detections and sessions detected per species.
 #'
-#' @seealso \code{\link{summarise_species_activity}}, \code{\link{get_top_species_total}}, \code{\link{get_top_species_nights}}
+#' @seealso \code{\link{summarise_species_activity}}, \code{\link{get_top_species_total}}, \code{\link{get_top_species_sessions}}
 #'
 #' @import ggplot2
 #' @importFrom scales pretty_breaks
 #' @export
 plot_top_species_line <- function(dataframe,
-                             type = c("detections", "nights", "both"),
+                             type = c("detections", "sessions", "both"),
                              style = c("overlay", "facet"),
                              n = 2) {
 
@@ -120,12 +124,12 @@ plot_top_species_line <- function(dataframe,
       slice_head(n = n) %>%
       mutate(rank_type = "Top by detections")
 
-  } else if (type == "nights") {
+  } else if (type == "sessions") {
 
     selected_species <- species_summary %>%
-      arrange(desc(nights_detected)) %>%
+      arrange(desc(sessions_detected)) %>%
       slice_head(n = n) %>%
-      mutate(rank_type = "Top by nights")
+      mutate(rank_type = "Top by sessions")
 
   } else {
 
@@ -135,12 +139,12 @@ plot_top_species_line <- function(dataframe,
       slice_head(n = n) %>%
       mutate(rank_type = "Top by detections")
 
-    top_nights <- species_summary %>%
-      arrange(desc(nights_detected)) %>%
+    top_sessions <- species_summary %>%
+      arrange(desc(sessions_detected)) %>%
       slice_head(n = n) %>%
-      mutate(rank_type = "Top by nights")
+      mutate(rank_type = "Top by sessions")
 
-    selected_species <- bind_rows(top_det, top_nights) %>%
+    selected_species <- bind_rows(top_det, top_sessions) %>%
       distinct(top_species_prediction, .keep_all = TRUE)
 
     # Enforce total max of 8
@@ -160,9 +164,14 @@ plot_top_species_line <- function(dataframe,
   }
 
   # ---- Prepare plotting data ----
+
+  if ("crop_status" %in% names(dataframe)) {
+    dataframe <- dataframe %>%
+      dplyr::filter(crop_status != "No detections for this image.")
+  }
+
   plot_data <- dataframe %>%
     filter(
-      crop_status != "No detections for this image.",
       top_species_prediction %in% selected_species$top_species_prediction
     ) %>%
     group_by(recording_session, top_species_prediction) %>%
@@ -213,7 +222,7 @@ plot_top_species_line <- function(dataframe,
     scale_colour_brewer(palette = "Dark2") +
     scale_y_continuous(breaks = pretty_breaks(n = 8)) +
     labs(
-      x = "Recording night",
+      x = "Recording session",
       y = "Number of detections",
       colour = "Species",
       linetype = if (type == "both") "Ranking" else NULL
@@ -240,23 +249,23 @@ plot_top_species_line <- function(dataframe,
 #' Plot activity of top species over time using bubble-style plot
 #'
 #' @param dataframe Results dataframe
-#' @param type Character. Determines which species are plotted: "detections" or "nights" (default "detections")
+#' @param type Character. Determines which species are plotted: "detections" or "sessions" (default "detections")
 #'   - "detections": plot species with the highest total number of detections over the deployment.
-#'   - "nights": plot species detected on the most nights (regardless of how many detections per night).
+#'   - "sessions": plot species detected on the most sessions (regardless of how many detections per night/day).
 #' @param n Number of species to include (default 3)
 #'
 #' @return ggplot object showing species activity over time
 #'
 #' @details
-#' Bubble size always represents the number of detections per night.
+#' Bubble size always represents the number of detections per night/day.
 #' This function internally calls \code{\link{summarise_species_activity}} to select the top species for plotting.
 #'
-#' @seealso \code{\link{summarise_species_activity}}, \code{\link{get_top_species_total}}, \code{\link{get_top_species_nights}}
+#' @seealso \code{\link{summarise_species_activity}}, \code{\link{get_top_species_total}}, \code{\link{get_top_species_sessions}}
 #'
 #' @import ggplot2
 #' @export
 plot_top_species_bubble <- function(dataframe,
-                                type = c("detections", "nights"),
+                                type = c("detections", "sessions"),
                                 n = 3) {
 
   type <- match.arg(type)
@@ -278,15 +287,19 @@ plot_top_species_bubble <- function(dataframe,
       pull(top_species_prediction)
   } else {
     selected_species <- species_summary %>%
-      arrange(desc(nights_detected)) %>%
+      arrange(desc(sessions_detected)) %>%
       slice_head(n = n) %>%
       pull(top_species_prediction)
   }
 
   # ---- Prepare data ----
+  if ("crop_status" %in% names(dataframe)) {
+    dataframe <- dataframe %>%
+      dplyr::filter(crop_status != "No detections for this image.")
+  }
+
   bubble_data <- dataframe %>%
     filter(
-      crop_status != "No detections for this image.",
       top_species_prediction %in% selected_species
     ) %>%
     group_by(recording_session, top_species_prediction) %>%
@@ -313,7 +326,7 @@ plot_top_species_bubble <- function(dataframe,
     scale_size_continuous(range = c(3, 12)) +
     scale_colour_brewer(palette = "Dark2", guide = "none") +  # remove legend
     labs(
-      x = "Recording night",
+      x = "Recording session",
       y = "Species",
       size = "Detections"
     ) +

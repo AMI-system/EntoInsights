@@ -6,7 +6,7 @@
 \usage{
 plot_top_species_line(
   dataframe,
-  type = c("detections", "nights", "both"),
+  type = c("detections", "sessions", "both"),
   style = c("overlay", "facet"),
   n = 2
 )
@@ -14,10 +14,10 @@ plot_top_species_line(
 \arguments{
 \item{dataframe}{Results dataframe.}
 
-\item{type}{Character. Determines which species to plot: "detections", "nights", or "both". Default = "detections".
+\item{type}{Character. Determines which species to plot: "detections", "sessions", or "both". Default = "detections".
 \itemize{
 \item "detections": plot species with the highest total number of detections over the deployment.
-\item "nights": plot species detected on the most nights (regardless of number of detections per night).
+\item "sessions": plot species detected on the most sessions (regardless of number of detections per night/day).
 \item "both": plot species from both criteria. Species may appear in one or both groups. Line type indicates which ranking the species belongs to.
 }}
 
@@ -32,8 +32,8 @@ ggplot object.
 Plot activity of top species over time using line-style plot
 }
 \details{
-This function internally calls \code{\link{summarise_species_activity}} to determine the total detections and nights detected per species.
+This function internally calls \code{\link{summarise_species_activity}} to determine the total detections and sessions detected per species.
 }
 \seealso{
-\code{\link{summarise_species_activity}}, \code{\link{get_top_species_total}}, \code{\link{get_top_species_nights}}
+\code{\link{summarise_species_activity}}, \code{\link{get_top_species_total}}, \code{\link{get_top_species_sessions}}
 }

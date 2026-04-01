@@ -1,4 +1,4 @@
-#' Append Recording Confidence Rules
+#' Append Recording Confidence Rules for moths
 #'
 #' This function appends columns onto a classifications dataframe indicating whether the classification is sensible regarding
 #' spatial presence (1 or 0), phenology (1 or 0), and appends a column with a scale regarding identification difficulty (from 1 - 4, distinct to requiring dissection, or 5, meaning Ungraded).

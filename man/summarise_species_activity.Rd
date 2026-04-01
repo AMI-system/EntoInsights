@@ -13,7 +13,7 @@ summarise_species_activity(dataframe)
 A dataframe with one row per species and summary activity metrics.
 }
 \description{
-Calculates total detections and total nights detected (raw count).
+Calculates total detections and total nights/days detected (raw count).
 }
 \details{
 This function is used internally by plotting functions to determine which species are most active.

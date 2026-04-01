@@ -4,15 +4,15 @@
 \alias{plot_top_species_bubble}
 \title{Plot activity of top species over time using bubble-style plot}
 \usage{
-plot_top_species_bubble(dataframe, type = c("detections", "nights"), n = 3)
+plot_top_species_bubble(dataframe, type = c("detections", "sessions"), n = 3)
 }
 \arguments{
 \item{dataframe}{Results dataframe}
 
-\item{type}{Character. Determines which species are plotted: "detections" or "nights" (default "detections")
+\item{type}{Character. Determines which species are plotted: "detections" or "sessions" (default "detections")
 \itemize{
 \item "detections": plot species with the highest total number of detections over the deployment.
-\item "nights": plot species detected on the most nights (regardless of how many detections per night).
+\item "sessions": plot species detected on the most sessions (regardless of how many detections per night/day).
 }}
 
 \item{n}{Number of species to include (default 3)}
@@ -24,9 +24,9 @@ ggplot object showing species activity over time
 Plot activity of top species over time using bubble-style plot
 }
 \details{
-Bubble size always represents the number of detections per night.
+Bubble size always represents the number of detections per night/day.
 This function internally calls \code{\link{summarise_species_activity}} to select the top species for plotting.
 }
 \seealso{
-\code{\link{summarise_species_activity}}, \code{\link{get_top_species_total}}, \code{\link{get_top_species_nights}}
+\code{\link{summarise_species_activity}}, \code{\link{get_top_species_total}}, \code{\link{get_top_species_sessions}}
 }

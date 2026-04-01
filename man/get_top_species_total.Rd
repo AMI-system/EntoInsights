@@ -22,5 +22,5 @@ This is a helper function that calls \code{\link{summarise_species_activity}} in
 Use this function when you want to quickly get the species most frequently detected over the deployment period.
 }
 \seealso{
-\code{\link{summarise_species_activity}}, \code{\link{get_top_species_nights}}
+\code{\link{summarise_species_activity}}, \code{\link{get_top_species_sessions}}
 }
