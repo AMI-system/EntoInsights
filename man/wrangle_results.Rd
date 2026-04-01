@@ -7,18 +7,22 @@
 wrangle_results(
   results_file,
   taxa = "moth",
+  source = NULL,
   filepath_colname = "image_path",
   sitename_colname = "deployment_name",
   latitude_colname = "latitude",
   longitude_colname = "longitude",
   topspeciespred_colname = "top_1_species",
-  speciesconf_colname = "top_1_confidence"
+  speciesconf_colname = "top_1_confidence",
+  ...
 )
 }
 \arguments{
 \item{results_file}{A string specifying the name of the file containing the concatenated csv results files}
 
 \item{taxa}{A string specifying the name of the taxa being analysed - e.g., moth, bird, bat}
+
+\item{source}{Optional. Provide model/source when selected taxa is 'bird' (currently must be "birdnet")}
 
 \item{filepath_colname}{A string specifying the name of the column containing filepaths}
 
@@ -39,5 +43,5 @@ A data.frame containing the wrangled results.
 This function takes a concatenated csv file for a deployment and
 runs a series of checks and data wrangling steps to format the data in
 a standardised way suitable for the downstream analysis pipeline.
-Currently just set-up for moth results (AMI/LepiSense)
+Currently set-up for moth results (AMI/LepiSense) and bird results outputted by BirdNET
 }
