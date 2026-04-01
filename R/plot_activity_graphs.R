@@ -18,39 +18,49 @@ plot_activity_graph <- function(dataframe, type){
     stop('`type` must be either "detections" or "species"')
   }
 
-  all_nights <- dataframe %>%
-    dplyr::group_by(recording_session) %>%
-    dplyr::summarise(
-      n_records = dplyr::n_distinct(filepath),
-      .groups = "drop"
-    ) %>%
-    dplyr::filter(n_records >= 10) %>% # keep only sessions where at least 10 files were recorded
-    dplyr::select(recording_session) %>%
-    dplyr::mutate(recording_session = as.Date(recording_session))
+  # Step 1: define valid sessions based on data type
+  if (!"crop_status" %in% names(dataframe)) {
+    # Bird data → keep only sessions with >=10 files
+    valid_sessions <- dataframe %>%
+      dplyr::group_by(recording_session) %>%
+      dplyr::summarise(n_files = dplyr::n_distinct(filepath), .groups = "drop") %>%
+      dplyr::filter(n_files >= 10) %>%
+      dplyr::select(recording_session)
+  } else {
+    # Moth data → keep all sessions
+    valid_sessions <- dataframe %>%
+      dplyr::distinct(recording_session)
+  }
 
+  # Step 2: filter dataframe to valid sessions
+  dataframe <- dataframe %>%
+    dplyr::filter(recording_session %in% valid_sessions$recording_session)
+
+  # Step 3: for moths, remove "No detections" rows
   if ("crop_status" %in% names(dataframe)) {
     dataframe <- dataframe %>%
       dplyr::filter(crop_status != "No detections for this image.")
   }
 
+  # Step 4: prepare plotting data
+  all_nights <- valid_sessions %>%
+    dplyr::mutate(recording_session = as.Date(recording_session))
+
   if (type == "detections"){
 
     detections_df <- dataframe %>%
-      group_by(recording_session) %>%
-      summarise(n_detections = n(), .groups = "drop")
+      dplyr::group_by(recording_session) %>%
+      dplyr::summarise(n_detections = dplyr::n(), .groups = "drop")
 
     detections_complete <- all_nights %>%
-      left_join(detections_df, by = "recording_session") %>%
-      mutate(n_detections = tidyr::replace_na(n_detections, 0))
+      dplyr::left_join(detections_df, by = "recording_session") %>%
+      dplyr::mutate(n_detections = tidyr::replace_na(n_detections, 0))
 
     detections_plot <- ggplot(detections_complete, aes(x = recording_session, y = n_detections)) +
       geom_point(size=3) +
-      labs(x = "Recording session", y = "Number of detections") +
       geom_line(linewidth=1) +
-      scale_x_date(
-        date_breaks = "2 weeks",
-        date_labels = "%d %b"
-      ) +
+      labs(x = "Recording session", y = "Number of detections") +
+      scale_x_date(date_breaks = "2 weeks", date_labels = "%d %b") +
       scale_y_continuous(breaks = pretty_breaks(n = 10)) +
       theme_classic() +
       theme(axis.text.x = element_text(angle = 90, vjust = 0.3, hjust = 0.5),
@@ -61,24 +71,21 @@ plot_activity_graph <- function(dataframe, type){
 
     return(detections_plot)
 
-  } else { # make species graph
+  } else { # species plot
 
     species_df <- dataframe %>%
-      group_by(recording_session) %>%
-      summarise(n_species = n_distinct(top_species_prediction), .groups = "drop")
+      dplyr::group_by(recording_session) %>%
+      dplyr::summarise(n_species = dplyr::n_distinct(top_species_prediction), .groups = "drop")
 
     species_complete <- all_nights %>%
-      left_join(species_df, by = "recording_session") %>%
-      mutate(n_species = tidyr::replace_na(n_species, 0))
+      dplyr::left_join(species_df, by = "recording_session") %>%
+      dplyr::mutate(n_species = tidyr::replace_na(n_species, 0))
 
     species_plot <- ggplot(species_complete, aes(x = recording_session, y = n_species)) +
       geom_point(size=3) +
-      labs(x = "Recording session", y = "Number of species") +
       geom_line(linewidth=1) +
-      scale_x_date(
-        date_breaks = "2 weeks",
-        date_labels = "%d %b"
-      ) +
+      labs(x = "Recording session", y = "Number of species") +
+      scale_x_date(date_breaks = "2 weeks", date_labels = "%d %b") +
       scale_y_continuous(breaks = pretty_breaks(n = 10)) +
       theme_classic() +
       theme(axis.text.x = element_text(angle = 90, vjust = 0.3, hjust = 0.5),
@@ -90,4 +97,5 @@ plot_activity_graph <- function(dataframe, type){
     return(species_plot)
 
   }
+
 }

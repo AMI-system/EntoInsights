@@ -14,28 +14,28 @@ get_activity_summary <- function(dataframe, detections = TRUE, species = TRUE){
 
   summary_stats <- list()
 
-  session_counts <- dataframe %>%
-    dplyr::group_by(recording_session) %>%
-    dplyr::summarise(
-      n_records = dplyr::n_distinct(filepath),
-      .groups = "drop"
-    )
+  # Define valid sessions based on data type
+  if (!"crop_status" %in% names(dataframe)) {
+    # Bird data → keep only sessions with >= 10 recording files
+    valid_sessions <- dataframe %>%
+      dplyr::group_by(recording_session) %>%
+      dplyr::summarise(n_files = dplyr::n_distinct(filepath), .groups = "drop") %>%
+      dplyr::filter(n_files >= 10) %>%
+      dplyr::select(recording_session)
+  } else {
+    # Moth data → keep all sessions
+    valid_sessions <- dataframe %>%
+      dplyr::distinct(recording_session)
+  }
 
-  valid_sessions <- session_counts %>%
-    dplyr::filter(n_records >= 10) %>%
-    dplyr::select(recording_session)
-
-  # Keep only valid sessions
+  # Step 2: filter dataframe to valid sessions
   dataframe <- dataframe %>%
     dplyr::filter(recording_session %in% valid_sessions$recording_session)
 
+  # Step 3: for moths, remove "No detections" rows
   if ("crop_status" %in% names(dataframe)) {
-    # Moth logic
     dataframe <- dataframe %>%
       dplyr::filter(crop_status != "No detections for this image.")
-  } else {
-    # Bird (or generic) logic → assume all rows are detections
-    dataframe <- dataframe
   }
 
   if (detections){
