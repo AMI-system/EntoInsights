@@ -151,7 +151,7 @@ download_object_store_files <- function(bucket, deployment_id, data_type, filena
 #' @return Data frame of download results.
 #'
 #' @details
-#' This function  calls \code{\link{download_object_store_files}} internally.
+#' This function  calls /code{/link{download_object_store_files}} internally.
 #' @seealso download_object_store_files
 #' @export
 download_top_detection_images <- function(dataframe,
@@ -202,6 +202,84 @@ download_top_detection_images <- function(dataframe,
     deployment_id = top_images$deployment_id,
     data_type = data_type,
     filename = top_images$image_path_basename,
+    download_path = download_path,
+    credentials_path = credentials_path,
+    save_download_log = save_download_log
+  )
+
+  return(df$local_path)
+
+}
+
+#' Download top N audio recordings with most activity
+#'
+#' Identifies recordings with the highest number of detections
+#' (based on number of rows per file) and downloads the audio files
+#' from the object store.
+#'
+#' @param dataframe Data frame containing inference results.
+#' @param n Integer. Number of recordings to return. Default = 3.
+#' @param data_type Character. Data type folder in bucket
+#'  e.g., audible_recordings.
+#' @param download_path Character. Local download directory.
+#' @param credentials_path Character. Path to AWS credentials JSON.
+#' @param save_download_log Logical. Whether to save download log.
+#'
+#' @return Character vector of local file paths.
+#'
+#' @details
+#' This function  calls /code{/link{download_object_store_files}} internally.
+#' @seealso download_object_store_files
+#'
+#' @export
+download_top_activity_audio <- function(dataframe,
+                                       n = 3,
+                                       data_type = "audible_recordings",
+                                       download_path = "./bird_downloads",
+                                       credentials_path = "./credentials.json",
+                                       save_download_log = TRUE) {
+
+  # Validate required columns
+  required_cols <- c("bucket_name", "deployment_id", "recording_session",
+                     "filename", "species_confidence")
+  missing_cols <- setdiff(required_cols, names(dataframe))
+  if (length(missing_cols) > 0) {
+    stop("Missing required columns: ", paste(missing_cols, collapse = ", "))
+  }
+
+  # Count detections per recording (rows per file)
+  activity_counts <- dataframe %>%
+    dplyr::filter(!is.na(filename),
+                  filename != "") %>%
+    dplyr::filter(!is.na(species_confidence),
+                  species_confidence >= 0.7) %>% # remove low confidence detections
+    dplyr::group_by(bucket_name, deployment_id, recording_session, filename) %>%
+    dplyr::summarise(
+      n_detections = dplyr::n(),
+      .groups = "drop"
+    ) %>%
+    dplyr::group_by(recording_session) %>%       # <- NEW: 1 recording per session
+    dplyr::slice_max(n_detections, n = 1, with_ties = FALSE) %>%
+    dplyr::ungroup() %>%
+    dplyr::arrange(dplyr::desc(n_detections))
+
+  if (nrow(activity_counts) == 0) {
+    stop("No recordings found.")
+  }
+
+  if (n > nrow(activity_counts)) {
+    warning("Requested n is greater than available recordings. Returning all available.")
+  }
+
+  top_audio <- activity_counts %>%
+    dplyr::slice_head(n = n)
+
+  # Download files
+  df <- download_object_store_files(
+    bucket = top_audio$bucket_name,
+    deployment_id = top_audio$deployment_id,
+    data_type = data_type,
+    filename = top_audio$filename,
     download_path = download_path,
     credentials_path = credentials_path,
     save_download_log = save_download_log
